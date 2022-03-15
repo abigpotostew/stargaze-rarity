@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@types/dotenv": "^8.2.0",
+    "cosmwasm": "^1.0.3",
     "pg": "^8.7.3",
     "typeorm": "^0.2.45"
   },

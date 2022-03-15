@@ -14,13 +14,14 @@ module.exports = {
     maxQueryExecutionTime: 4000,
     entities: [
         // env === 'production' ? 'dist/database/entities/*{.ts,.js}' : 'src/database/entities/*{.ts,.js}',
-        'src/database/entities/*{.ts,.js}'
+        '.build/src/database/entities/*.js'
+        
     ],
     migrations: [
         // env === 'production'
         //     ? 'dist/database/migrations/*{.ts,.js}'
         //     : 'src/database/migrations/*{.ts,.js}',
-        'src/database/entities/*{.ts,.js}'
+        '.build/src/database/entities/*.js'
     ],
     cli: {
         entitiesDir: 'src/database/entities',

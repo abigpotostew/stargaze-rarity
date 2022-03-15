@@ -13,8 +13,8 @@ provider:
 #    POSTGRESQL_PORT: ${self:custom.POSTGRESQL.PORT}
 
 functions:
-  hello:
-    handler: handler.hello
+  contract:
+    handler: handler.handler
     events:
       - httpApi:
           path: /
@@ -22,6 +22,13 @@ functions:
       - httpApi:
           path: /test-create
           method: post
+      - httpApi:
+          path: /contract
+          method: post
+      - httpApi:
+          method: GET
+          path: /contract/{contractId}
+
 
 plugins:
   - serverless-plugin-typescript
