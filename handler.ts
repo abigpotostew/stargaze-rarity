@@ -10,6 +10,7 @@ dotenv.config();
 let db: Connection | null = null
 
 const createContract: any = async (contractId: string) => {
+  // Probably want to add some validation for contractId
   if (!db) {
     db = await connectDatabase()
   }
@@ -26,7 +27,7 @@ const handleCreateContract: Handler = async (event: any, context: Context) => {
     const contractId = JSON.parse(body).contractId
     const contract = await createContract(contractId)
     const response = {
-      statusCode: 200,
+      statusCode: 201,
       body: JSON.stringify(contract),
     };
     return response
@@ -58,7 +59,7 @@ const handleReadContract: Handler = async (event: any, context: Context) => {
   }
 }
 
-const hello: Handler = async (event: any) => {
+const createRandom: Handler = async (event: any) => {
   if (!db) {
     db = await connectDatabase()
   }
@@ -73,11 +74,8 @@ const hello: Handler = async (event: any) => {
 
   const newcontract = await sg721repo.save(contract)
   const response = {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: `created: ${JSON.stringify(newcontract)}`,
-      }),
+    statusCode: 201,
+    body: JSON.stringify(newcontract),
   };
   return response
 }
@@ -119,8 +117,8 @@ export const handler: Handler = async (event: any, context: Context) => {
       return handleCreateContract(event, context, null)
     case 'GET /contract/{contractId}':
       return handleReadContract(event, context, null)
-    case 'GET /test-create':
-      return hello(event, context, null);
+    case 'POST /test-create':
+      return createRandom(event, context, null);
   }
   return defaultResponse(event, null, null);
 

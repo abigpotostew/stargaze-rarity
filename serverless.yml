@@ -13,7 +13,7 @@ provider:
 #    POSTGRESQL_PORT: ${self:custom.POSTGRESQL.PORT}
 
 functions:
-  hello:
+  contract:
     handler: handler.handler
     events:
       - httpApi:
