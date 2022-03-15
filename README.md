@@ -44,6 +44,16 @@ then invoke from curl localhost:3000/
 curl https://xxxxxxxxx.execute-api.us-east-1.amazonaws.com/
 ```
 
+**Create a contract**
+```curl
+curl --location --request POST 'localhost:3000/contract' \
+--header 'Content-Type: application/json' \
+--data-raw '{"contractId":"stars1tcpnf8nuywsalf4h30pw646a83vckqjvgacwj7"}'
+```
+**Read a contract**
+```curl
+curl --location --request GET 'localhost:3000/contract/stars1tcpnf8nuywsalf4h30pw646a83vckqjvgacwj7'
+```
 
 
 ----
