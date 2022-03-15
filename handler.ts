@@ -18,13 +18,13 @@ const createContract: any = async (contractId: string) => {
   }
   
 
-   const contract = await services.repo.getContract(contractId)
+   const contract = await services.repo.createContract(contractId)
 
   const traitRepo = getManager().getRepository(Trait)
   const sampleTrait =traitRepo.create()
   sampleTrait.contract = contract
   sampleTrait.name = "sample trait name"
-  traitRepo.save(sampleTrait)
+  await traitRepo.save(sampleTrait)
   
   return services.repo.getContract(contractId)
   

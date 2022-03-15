@@ -21,7 +21,7 @@ module.exports = {
         // env === 'production'
         //     ? 'dist/database/migrations/*{.ts,.js}'
         //     : 'src/database/migrations/*{.ts,.js}',
-        'src/database/migrations/*{.ts,.js}'
+        // 'src/database/migrations/*.ts'
     ],
     cli: {
         entitiesDir: 'src/database/entities',
