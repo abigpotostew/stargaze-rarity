@@ -10,7 +10,7 @@ export class SG721s {
     length: 64,
     unique: true
     })
-    contract: string;
+    contract: string; // Probably want to validate that it is a stars... address    
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
