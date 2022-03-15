@@ -2,23 +2,32 @@ import { Context, Handler, } from 'aws-lambda';
 import * as dotenv from 'dotenv';
 import { connectDatabase } from "./src/database/pg";
 import { Connection, getManager } from "typeorm";
-import { SG721s } from "./src/database/entities/sg721.entity";
+import { SG721 } from "./src/database/entities/sg721.entity";
 import { randomContract } from "./src/utils"
+import { getServicesSingleton, Services } from "./src/services";
+import { Trait } from "./src/database/entities/trait.entity";
 
 dotenv.config();
 
-let db: Connection | null = null
+let services: Services | null = null
 
 const createContract: any = async (contractId: string) => {
   // Probably want to add some validation for contractId
-  if (!db) {
-    db = await connectDatabase()
+  if (!services) {
+    services = await getServicesSingleton()
   }
-  const sg721repo = getManager().getRepository(SG721s)
-  const contract = sg721repo.create()
-  contract.contract = contractId
+  
 
-  return await sg721repo.save(contract)
+   const contract = await services.repo.getContract(contractId)
+
+  const traitRepo = getManager().getRepository(Trait)
+  const sampleTrait =traitRepo.create()
+  sampleTrait.contract = contract
+  sampleTrait.name = "sample trait name"
+  traitRepo.save(sampleTrait)
+  
+  return services.repo.getContract(contractId)
+  
 }
 
 const handleCreateContract: Handler = async (event: any, context: Context) => {
@@ -37,12 +46,10 @@ const handleCreateContract: Handler = async (event: any, context: Context) => {
   }
 }
 const readContract: any = async (contractId: string) => {
-  if (!db) {
-    db = await connectDatabase()
-    const sg721repo = getManager().getRepository(SG721s); // you can also get it via getConnection().manager
-    const contract: SG721s = await sg721repo.findOne({ contract: contractId });
-    return contract
+  if (!services) {
+    services = await getServicesSingleton()
   }
+  return services.repo.getContract(contractId)
 }
 
 const handleReadContract: Handler = async (event: any, context: Context) => {
@@ -60,15 +67,15 @@ const handleReadContract: Handler = async (event: any, context: Context) => {
 }
 
 const createRandom: Handler = async (event: any) => {
-  if (!db) {
-    db = await connectDatabase()
+  if (!services) {
+    services = await getServicesSingleton()
   }
   const req = event.requestContext.http
 
   // create a new SG721
 
   // not sure why but the sg721 file is not being compiled to commonjs
-  const sg721repo = getManager().getRepository(SG721s)
+  const sg721repo = getManager().getRepository(SG721)
   const contract = sg721repo.create()
   contract.contract = await randomContract()
 

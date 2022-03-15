@@ -9,7 +9,7 @@ module.exports = {
     password: process.env.POSTGRESQL_PASSWORD,
     database: process.env.POSTGRESQL_DATABASE,
     
-    synchronize: true,
+    synchronize: false,
     logging: true,
     maxQueryExecutionTime: 4000,
     entities: [
@@ -21,7 +21,7 @@ module.exports = {
         // env === 'production'
         //     ? 'dist/database/migrations/*{.ts,.js}'
         //     : 'src/database/migrations/*{.ts,.js}',
-        '.build/src/database/entities/*.js'
+        'src/database/migrations/*{.ts,.js}'
     ],
     cli: {
         entitiesDir: 'src/database/entities',

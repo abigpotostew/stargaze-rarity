@@ -1,3 +1,5 @@
+# org and app are used when using the serverless paid app feature. we can use it for $20 a month.
+
 #org: abigpotostew21
 #app: stargaze-rarity
 service: stargaze-rarity
@@ -34,6 +36,7 @@ plugins:
   - serverless-plugin-typescript
   - serverless-offline
 #  - serverless-pseudo-parameters
+
 resources:
 #  Resources:
 #    LambdaRole: ${file(./resource/LambdaRole.yml)}

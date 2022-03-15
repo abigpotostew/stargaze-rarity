@@ -55,6 +55,14 @@ curl --location --request POST 'localhost:3000/contract' \
 curl --location --request GET 'localhost:3000/contract/stars1tcpnf8nuywsalf4h30pw646a83vckqjvgacwj7'
 ```
 
+-----
+Migrations:
+* Create migration
+`npm run typeorm migration:create -n <name>`
+* run all
+`npm run typeorm migration:run`
+* revert last migration
+`npm run typeorm migration:revert`
 
 ----
 Progress Notes 3/14:
