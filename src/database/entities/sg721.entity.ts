@@ -1,8 +1,12 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Trait } from "./trait.entity";
+import { Exclude } from "class-transformer";
+
 
 @Entity('sg721s')
 export class SG721 {
+
+  @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 

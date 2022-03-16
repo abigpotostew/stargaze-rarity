@@ -5,6 +5,7 @@
   "dependencies": {
     "@aws-sdk/client-sns": "^3.54.1",
     "@types/dotenv": "^8.2.0",
+    "class-transformer": "^0.5.1",
     "cosmwasm": "^1.0.3",
     "pg": "^8.7.3",
     "typeorm": "^0.2.45"
