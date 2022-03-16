@@ -1,7 +1,7 @@
 
-import { createContract, readContract } from "./service"
-import { instanceToPlain, plainToClass } from "class-transformer";
-import { ApiResponse } from "./apiResponse"
+import { instanceToPlain } from "class-transformer";
+import { ApiResponse } from "./apiResponse";
+import { createContract, readContract, listContracts } from "./service";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -33,7 +33,14 @@ const handleReadContract = async (contractId) => {
     })
 }
 
+const handleListContracts = async (page, limit) => {
+    return handleReturn(200, async () => {
+        return await listContracts(page, limit)
+    })
+}
+
 export {
     handleCreateContract,
-    handleReadContract
-}
+    handleReadContract,
+    handleListContracts
+};

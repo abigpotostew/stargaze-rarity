@@ -11,7 +11,11 @@ export class Repository {
   async getContract(contractId: string): Promise<SG721 | undefined> {
     return await this.db.manager.getRepository(SG721).findOne({ contract: contractId }, { relations: ["traits"] });
   }
-  
+
+  async getContracts(take: number | undefined, skip: number | undefined): Promise<SG721[] | undefined> {
+    return await this.db.manager.getRepository(SG721).find({ take, skip, relations: ["traits"] });
+  }
+
   async createContract(contractId: string): Promise<SG721> {
     const sg721repo = this.db.manager.getRepository(SG721)
     let contract = sg721repo.create()

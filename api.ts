@@ -1,12 +1,9 @@
 import { PublishCommand, PublishCommandInput, SNSClient } from "@aws-sdk/client-sns";
-import { Context, Handler } from 'aws-lambda';
+import { Handler } from 'aws-lambda';
 import * as dotenv from 'dotenv';
-import { getManager } from "typeorm";
 import { ApiResponse, isOk } from "./src/api/apiResponse";
-import { handleCreateContract, handleReadContract } from "./src/api/controller";
-import { SG721 } from "./src/database/entities/sg721.entity";
-import { getServicesSingleton, Services } from "./src/services";
-import { randomContract } from "./src/utils";
+import { handleCreateContract, handleReadContract,handleListContracts } from "./src/api/controller";
+import { Services } from "./src/services";
 
 dotenv.config();
 
@@ -35,12 +32,18 @@ const publishSnsTopic = async (data) => {
 }
 
 export const handler: Handler = async (event: any) => {
+  console.log(event)
   try {
     const { routeKey } = event
     switch (routeKey) {
-      case 'POST /contracts': {
-        const { body } = event;
-        const { contractId } = JSON.parse(body)
+      case 'GET /contracts': {
+        const {page, limit} = event.queryStringParameters
+        const response: ApiResponse = await handleListContracts(page, limit)
+        return response
+      }
+
+      case 'POST /contracts/{contractId}': {
+        const { pathParameters: { contractId } } = event
         const response: ApiResponse = await handleCreateContract(contractId)
         if (isOk(response)) {
           await publishSnsTopic({ contractId })
@@ -53,6 +56,16 @@ export const handler: Handler = async (event: any) => {
         const response: ApiResponse = await handleReadContract(contractId)
         return response
       }
+
+      case 'GET /contracts/{contractId}/rarities': {
+        return {}
+      }
+
+      case 'GET /contracts/{contractId}/rarities/{tokenId}': {
+        return {}
+      }
+
+
 
       default: {
         throw new Error(`'${routeKey}' is not a supported route.`)

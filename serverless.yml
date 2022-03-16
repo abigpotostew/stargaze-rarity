@@ -27,17 +27,20 @@ functions:
     handler: api.handler
     events:
       - httpApi:
-          path: /
+          path: /contracts
           method: get
       - httpApi:
-          path: /test-create
+          path: /contracts/{contractId}
           method: post
       - httpApi:
-          path: /contract
-          method: post
+          path: /contracts/{contractId}
+          method: get
       - httpApi:
-          method: GET
-          path: /contract/{contractId}
+          path: /contracts/{contractId}/rarities
+          method: get          
+      - httpApi:
+          path: /contracts/{contractId}/rarities/{tokenId}
+          method: get          
   metadata:
     handler: metadata.handler
     events:
