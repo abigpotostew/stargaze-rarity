@@ -5,13 +5,12 @@
 service: stargaze-rarity
 frameworkVersion: '3'
 custom:
-    metadataTopic: metadata-topic #This is the global name of the topic
+    metadataTopic: ${self:service}-${opt:stage, 'dev'}-metadata-topic #This is the global name of the topic
 
 provider:
   name: aws
   region: us-east-1
-  runtime: nodejs14.x
-  
+  runtime: nodejs14.x  
   environment:
     METADATA_TOPIC_ARN: arn:aws:sns:${aws:region}:${aws:accountId}:${self:custom.metadataTopic}
     #postgresql
