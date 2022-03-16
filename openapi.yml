@@ -49,7 +49,7 @@ paths:
 
   /contracts/{contractId}/rarities:
     get:
-      summary: Returns a paginated list of limited rarity information for each NFT in the contract (sorted by rank ASC)
+      summary: Returns a paginated list of rarity information for each NFT in the contract (sorted by rank ASC)
       responses:
         "200": # status code
           description: A JSON array of rarities
@@ -58,7 +58,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/LimitedRarity"
+                  $ref: "#/components/schemas/Rarity"
       parameters:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Limit"
@@ -66,7 +66,7 @@ paths:
 
   /contracts/{contractId}/rarities/{tokenId}:
     get:
-      summary: Returns full rarity data for a give token
+      summary: Returns rarity data for a given token
       responses:
         "200": # status code
           description: A rarity object
