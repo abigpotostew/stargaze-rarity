@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  title: Stargaze Rarity API
+  description: Retrieve trait based rarities from valid sg721 contracts on Stargaze
+  version: 0.1.1
+servers:
+  - url: http://api.example.com/v1
+    description: Main (production)
+  - url: http://staging-api.example.com
+    description: Staging
+paths:
+  /contracts:
+    get:
+      summary: Returns a paginated list of sg721 contracts
+      responses:
+        "200": # status code
+          description: A JSON array of contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+    parameters:
+      - $ref: "#/components/parameters/Page"
+      - $ref: "#/components/parameters/Limit"
+
+  /contracts/{contractId}:
+    get:
+      summary: Returns a single contract
+      responses:
+        "200": # status code
+          description: A contract object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+    post:
+      summary: Adds a new contract to process. Fails on duplicate contract
+      responses:
+        "201": # status code
+          description: A contract object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+    parameters:
+      - $ref: "#/components/parameters/ContractId"
+
+  /contracts/{contractId}/rarities:
+    get:
+      summary: Returns a paginated list of rarity information for each NFT in the contract (sorted by rank ASC)
+      responses:
+        "200": # status code
+          description: A JSON array of rarities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rarity"
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/ContractId"
+
+  /contracts/{contractId}/rarities/{tokenId}:
+    get:
+      summary: Returns rarity data for a given token
+      responses:
+        "200": # status code
+          description: A rarity object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rarity"
+      parameters:
+        - $ref: "#/components/parameters/TokenId"
+        - $ref: "#/components/parameters/ContractId"
+
+components:
+  schemas:
+    Contract:
+      type: object
+      properties:
+        contractId:
+          $ref: "#/components/schemas/ContractId"
+        createdAt:
+          type: string
+          format: "date-time"
+        traits:
+          type: array
+          items:
+            type: string
+        numItems:
+          type: integer
+    ContractId:
+      type: string
+      minLength: 64
+      maxLength: 64
+    TokenId:
+      type: integer
+    Rank:
+      type: integer
+    Score:
+      type: number
+      format: double
+    Percent:
+      type: number
+      format: double
+    Trait:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        numItemsWith:
+          type: integer
+        # percentItemsWith:
+        #   $ref: "#/components/schemas/Percent"
+        score:
+          $ref: "#/components/schemas/Score"
+    Traits:
+      type: array
+      items:
+        $ref: "#/components/schemas/Trait"
+    LimitedRarity:
+      type: object
+      properties:
+        tokenId:
+          $ref: "#/components/schemas/TokenId"
+        rank:
+          $ref: "#/components/schemas/Rank"
+        score:
+          $ref: "#/components/schemas/Score"
+    Rarity:
+      type: object
+      properties:
+        tokenId:
+          $ref: "#/components/schemas/TokenId"
+        rank:
+          $ref: "#/components/schemas/Rank"
+        score:
+          $ref: "#/components/schemas/Score"
+        traits:
+          $ref: "#/components/schemas/Traits"
+
+  parameters:
+    Page:
+      name: "page"
+      in: "query"
+      schema:
+        type: integer
+    Limit:
+      name: "limit"
+      in: "query"
+      schema:
+        type: integer
+        maximum: 30
+    ContractId:
+      name: "contractId"
+      in: "path"
+      required: true
+      schema:
+        $ref: "#/components/schemas/ContractId"
+    TokenId:
+      name: "tokenId"
+      in: "path"
+      required: true
+      schema:
+        $ref: "#/components/schemas/TokenId"
