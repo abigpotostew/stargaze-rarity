@@ -1,33 +1,60 @@
-import { Context, Handler, } from 'aws-lambda';
+import { Context, Handler } from 'aws-lambda';
+import { SNSClient, PublishCommand, PublishCommandInput, PublishCommandOutput } from "@aws-sdk/client-sns";
 import * as dotenv from 'dotenv';
-import { connectDatabase } from "./src/database/pg";
-import { Connection, getManager } from "typeorm";
+import { getManager } from "typeorm";
 import { SG721 } from "./src/database/entities/sg721.entity";
-import { randomContract } from "./src/utils"
-import { getServicesSingleton, Services } from "./src/services";
 import { Trait } from "./src/database/entities/trait.entity";
+import { getServicesSingleton, Services } from "./src/services";
+import { randomContract } from "./src/utils";
 
 dotenv.config();
 
 let services: Services | null = null
+const { AWS_REGION: region, IS_OFFLINE: isOffline } = process.env
+const snsClient = new SNSClient({ region });
+let awsAccountId
+// const snsTopic = `arn:aws:sns:${region}:${accountId}:contract-create-topic`
+// console.log(process.env, region)
+
+const publishSnsTopic = async (data) => {
+  try {
+    if (!isOffline && awsAccountId) {
+      const snsTopic = `arn:aws:sns:${region}:${awsAccountId}:metadata-topic`
+      const params: PublishCommandInput = {
+        Message: JSON.stringify(data),
+        TopicArn: snsTopic
+      }
+      const command = new PublishCommand(params);
+      const result = await snsClient.send(command)
+      console.log("Success", result)
+      return result
+    }
+    else {
+      console.log("No SNS messages sent in offline mode")
+    }
+
+  } catch (err) {
+    console.log("Error", err.stack);
+  }
+}
 
 const createContract: any = async (contractId: string) => {
   // Probably want to add some validation for contractId
   if (!services) {
     services = await getServicesSingleton()
   }
-  
 
-   const contract = await services.repo.createContract(contractId)
+
+  const contract = await services.repo.createContract(contractId)
 
   const traitRepo = getManager().getRepository(Trait)
-  const sampleTrait =traitRepo.create()
+  const sampleTrait = traitRepo.create()
   sampleTrait.contract = contract
   sampleTrait.name = "sample trait name"
   await traitRepo.save(sampleTrait)
-  
+
   return services.repo.getContract(contractId)
-  
+
 }
 
 const handleCreateContract: Handler = async (event: any, context: Context) => {
@@ -35,6 +62,7 @@ const handleCreateContract: Handler = async (event: any, context: Context) => {
     const { body } = event;
     const contractId = JSON.parse(body).contractId
     const contract = await createContract(contractId)
+    const publish = await publishSnsTopic({ contractId })
     const response = {
       statusCode: 201,
       body: JSON.stringify(contract),
@@ -80,6 +108,7 @@ const createRandom: Handler = async (event: any) => {
   contract.contract = await randomContract()
 
   const newcontract = await sg721repo.save(contract)
+  const publish = await publishSnsTopic({ contractId: contract.contract })
   const response = {
     statusCode: 201,
     body: JSON.stringify(newcontract),
@@ -117,7 +146,10 @@ const defaultResponse: Handler = async (event: any) => {
 }
 
 export const handler: Handler = async (event: any, context: Context) => {
-  const req = event.requestContext.http
+  if (!isOffline) {
+    awsAccountId = context.invokedFunctionArn.split(':')[4]
+  }
+
   const { routeKey } = event
   switch (routeKey) {
     case 'POST /contract':

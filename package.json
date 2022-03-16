@@ -3,6 +3,7 @@
   "description": "",
   "version": "0.1.0",
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.54.1",
     "@types/dotenv": "^8.2.0",
     "cosmwasm": "^1.0.3",
     "pg": "^8.7.3",
