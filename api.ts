@@ -10,16 +10,13 @@ import { randomContract } from "./src/utils";
 dotenv.config();
 
 let services: Services | null = null
-const { AWS_REGION: region, IS_OFFLINE: isOffline } = process.env
+const { AWS_REGION: region, IS_OFFLINE: isOffline, METADATA_TOPIC_ARN:snsTopic } = process.env
 const snsClient = new SNSClient({ region });
-let awsAccountId
-// const snsTopic = `arn:aws:sns:${region}:${accountId}:contract-create-topic`
-// console.log(process.env, region)
+// console.log(snsTopic)
 
 const publishSnsTopic = async (data) => {
   try {
-    if (!isOffline && awsAccountId) {
-      const snsTopic = `arn:aws:sns:${region}:${awsAccountId}:metadata-topic`
+    if (!isOffline && snsTopic) {
       const params: PublishCommandInput = {
         Message: JSON.stringify(data),
         TopicArn: snsTopic
@@ -146,10 +143,6 @@ const defaultResponse: Handler = async (event: any) => {
 }
 
 export const handler: Handler = async (event: any, context: Context) => {
-  if (!isOffline) {
-    awsAccountId = context.invokedFunctionArn.split(':')[4]
-  }
-
   const { routeKey } = event
   switch (routeKey) {
     case 'POST /contract':
