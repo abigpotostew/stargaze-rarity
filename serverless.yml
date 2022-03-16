@@ -4,18 +4,22 @@
 #app: stargaze-rarity
 service: stargaze-rarity
 frameworkVersion: '3'
+custom:
+    metadataTopic: metadata-topic #This is the global name of the topic
 
 provider:
   name: aws
   region: us-east-1
   runtime: nodejs14.x
-  environment:     
+  
+  environment:
+    METADATA_TOPIC_ARN: arn:aws:sns:${aws:region}:${aws:accountId}:${self:custom.metadataTopic}
     #postgresql
 #    POSTGRESQL_HOST: ${self:custom.POSTGRESQL.HOST}
 #    POSTGRESQL_PORT: ${self:custom.POSTGRESQL.PORT}
   iamRoleStatements:    
     - Effect: Allow
-      Action: sns:Publish
+      Action: sns:Publish`
       Resource:
         - Ref: MetadataTopic  
 
@@ -41,7 +45,7 @@ functions:
       - sns: 
           arn: 
             Ref: MetadataTopic
-          topicName: metadata-topic
+          topicName: ${self:custom.metadataTopic}
 
 
 plugins:
@@ -54,7 +58,7 @@ resources:
     MetadataTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: metadata-topic
+        TopicName: ${self:custom.metadataTopic}
       
 #  Resources:
 #    LambdaRole: ${file(./resource/LambdaRole.yml)}
