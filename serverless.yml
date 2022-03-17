@@ -44,6 +44,9 @@ functions:
   metadata:
     handler: metadata.handler
     events:
+      - httpApi:
+          method: POST
+          path: /metadata-test
       - sns: 
           arn: 
             Ref: MetadataTopic
