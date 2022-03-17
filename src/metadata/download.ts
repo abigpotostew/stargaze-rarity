@@ -80,5 +80,5 @@ export const downloadMetadata = async (sg721Contract: string) => {
 
   // analysis on traits
   console.log('done')
-  return { allTraits, tokenTraits, scores, numTokens }
+  return { allTraits, tokenTraits, scores, numTokens, tokenIds: Array.from(tokenTraits.keys()) }
 }
