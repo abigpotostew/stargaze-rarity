@@ -10,6 +10,10 @@ interface Trait {
   value: TraitValue;
 }
 
+const getCid=(baseUri:string)=>{
+  return baseUri.replace('ipfs://','')
+}
+
 export const downloadMetadata = async (sg721Contract: string) => {
   // get contract info
   const config = defaultConfig();
@@ -18,7 +22,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
 
   //assume it's sequential, without gaps in token ids
 
-  const cid = contractInfo.baseUri.split("/").pop()
+  const cid = getCid(contractInfo.baseUri)
 
   const allTraits: { [key: string]: Map<TraitValue, number> } = {};
   const tokenTraits = new Map<string, Trait[]>();

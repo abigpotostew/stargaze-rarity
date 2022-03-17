@@ -65,7 +65,8 @@ Migrations:
 `npm run typeorm migration:revert`
 
 ----
-Progress Notes 3/14:
-1. Plan is to deploy lambdas with `sls deploy`. Database to be manually created.
-2. Local dev using `npm run start` which automatically recompiles. Debug by debugging the `npm run start` node process
-3. Stopping point-- stuck on loading the entities for typeorm.
+
+Notes on the functionality:
+- Nfts are minted sequentially. Any gaps will result in a failure.
+- if one nft doesn't have a trait that others have, that is still considered in the rarity score for that one.
+- 
