@@ -23,7 +23,7 @@ export class Token {
     meta: TokenMeta[];
 
     @ManyToOne(() => SG721, contract => contract.traits)
-    @JoinColumn({ name: 'contract_id' })
+    @JoinColumn({ name: 'contract_id'})
     contract: SG721;
 
     @OneToMany(() => TokenTrait, trait => trait.token)

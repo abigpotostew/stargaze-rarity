@@ -19,7 +19,7 @@ export class TokenTrait {
     contract: SG721;
 
     @ManyToOne(() => Token, token => token.traits)
-    @JoinColumn([{ name: 'token_id' }, { name: 'contract_id' }])
+    @JoinColumn({ name: 'token_id'})
     token: Token;
 
     @Column({
@@ -36,15 +36,15 @@ export class TokenTrait {
     value: string;
 
     // Might want to support this in the future
-  //   @Column({
-  //     type: "varchar",
-  //     length: 1024,
-  //     name: 'display_type'
-  //   })
-  //   displayType: string; 
+    //   @Column({
+    //     type: "varchar",
+    //     length: 1024,
+    //     name: 'display_type'
+    //   })
+    //   displayType: string; 
 
     @OneToOne(() => Trait)
-    @JoinColumn([{ name: 'contract_id' }, { name: 'trait_type' }])
+    @JoinColumn({name:'trait_id'})
     trait: Trait;
 
 }
