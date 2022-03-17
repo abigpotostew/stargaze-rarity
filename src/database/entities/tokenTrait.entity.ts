@@ -1,25 +1,32 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { SG721 } from "./sg721.entity";
 import { Token } from "./token.entity";
-import { Trait } from "./trait.entity";
+import { SG721Trait } from "./sg721Trait.entity";
+import { TraitValue } from "../utils/types";
+import { Exclude } from "class-transformer";
 
 /**
  * Trying to follow: https://docs.opensea.io/docs/metadata-standards
  */
 @Entity('token_traits')
 export class TokenTrait {
+
+    @Exclude()
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Exclude()
     @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
     createdAt: Date;
 
+    @Exclude()
     @ManyToOne(() => SG721)
     @JoinColumn({ name: 'contract_id' })
     contract: SG721;
 
+    @Exclude()
     @ManyToOne(() => Token, token => token.traits)
-    @JoinColumn({ name: 'token_id'})
+    @JoinColumn({ name: 'token_id' })
     token: Token;
 
     @Column({
@@ -30,10 +37,12 @@ export class TokenTrait {
     traitType: string;
 
     @Column({
-        type: "varchar",
-        length: 1024,
-    })
-    value: string;
+        type: "jsonb",
+        array: false,
+        nullable: true
+      })
+      value: TraitValue;
+
 
     // Might want to support this in the future
     //   @Column({
@@ -43,8 +52,8 @@ export class TokenTrait {
     //   })
     //   displayType: string; 
 
-    @OneToOne(() => Trait)
-    @JoinColumn({name:'trait_id'})
-    trait: Trait;
+    @OneToOne(() => SG721Trait)
+    @JoinColumn({ name: 'trait_id' })
+    trait: SG721Trait;
 
 }

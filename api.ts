@@ -2,7 +2,7 @@ import { PublishCommand, PublishCommandInput, SNSClient } from "@aws-sdk/client-
 import { Handler } from 'aws-lambda';
 import * as dotenv from 'dotenv';
 import { ApiResponse, isOk } from "./src/api/apiResponse";
-import { handleCreateContract, handleReadContract,handleListContracts } from "./src/api/controller";
+import { handleCreateContract, handleReadContract,handleListContracts, handleReadToken } from "./src/api/controller";
 import { Services } from "./src/services";
 
 dotenv.config();
@@ -62,7 +62,9 @@ export const handler: Handler = async (event: any) => {
       }
 
       case 'GET /contracts/{contractId}/rarities/{tokenId}': {
-        return {}
+        const { pathParameters: { contractId, tokenId } } = event
+        const response: ApiResponse = await handleReadToken(contractId, tokenId)
+        return response
       }
 
 

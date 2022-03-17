@@ -1,3 +1,4 @@
+import { Exclude, Expose } from 'class-transformer';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { SG721 } from './sg721.entity';
 import { TokenMeta } from './tokenMeta.entity';
@@ -6,9 +7,12 @@ import { TokenTrait } from './tokenTrait.entity';
 @Entity('tokens')
 @Unique(['tokenId', 'contract'])
 export class Token {
+
+    @Exclude()
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Exclude()
     @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
     createdAt: Date;
 
@@ -19,13 +23,13 @@ export class Token {
     })
     tokenId: string;
 
-    @OneToOne(() => TokenMeta, meta => meta.token)
-    meta: TokenMeta[];
+    @OneToOne(() => TokenMeta, meta => meta.token, { cascade: true })
+    meta: TokenMeta;
 
-    @ManyToOne(() => SG721, contract => contract.traits)
-    @JoinColumn({ name: 'contract_id'})
+    @ManyToOne(() => SG721, contract => contract.tokens)
+    @JoinColumn({ name: 'contract_id', referencedColumnName: 'contract' })
     contract: SG721;
 
-    @OneToMany(() => TokenTrait, trait => trait.token)
+    @OneToMany(() => TokenTrait, trait => trait.token, { cascade: true })
     traits: TokenTrait[];
 }

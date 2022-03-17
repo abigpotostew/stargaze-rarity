@@ -1,7 +1,7 @@
 
 import { instanceToPlain } from "class-transformer";
 import { ApiResponse } from "./apiResponse";
-import { createContract, readContract, listContracts } from "./service";
+import { createContract, readContract, listContracts, readToken } from "./service";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -13,6 +13,7 @@ const handleReturn = async (statusCode: number, callback: () => any): Promise<Ap
             body: toJson(result),
         }
     } catch (e) {
+        console.log(e)
         const { message } = e
         return {
             statusCode: 400,
@@ -39,8 +40,15 @@ const handleListContracts = async (page, limit) => {
     })
 }
 
+const handleReadToken = async(contractId, tokenId) => {
+    return handleReturn(200, async () => {
+        return await readToken(contractId, tokenId)
+    })
+}
+
 export {
     handleCreateContract,
     handleReadContract,
-    handleListContracts
+    handleListContracts,
+    handleReadToken
 };
