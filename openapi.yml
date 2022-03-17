@@ -99,7 +99,7 @@ components:
       minLength: 64
       maxLength: 64
     TokenId:
-      type: integer
+      type: string
     Rank:
       type: integer
     Score:

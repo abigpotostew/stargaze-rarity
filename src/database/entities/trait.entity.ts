@@ -16,6 +16,20 @@ export class Trait {
   @Column({
     type: "varchar",
     length: 1024,
+    name: 'trait_type'
   })
-  name: string;   
+  traitType: string;
+
+    // Might want to support this in the future
+  //   @Column({
+  //     type: "varchar",
+  //     length: 1024,
+  //     name: 'display_type'
+  //   })
+  //   displayType: string; 
+
+  @Column({
+    type: "integer"
+  })
+  count: number
 }

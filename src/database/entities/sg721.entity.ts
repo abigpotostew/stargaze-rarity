@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Trait } from "./trait.entity";
 import { Exclude } from "class-transformer";
+import { Token } from "./token.entity";
 
 
 @Entity('sg721s')
@@ -22,4 +23,8 @@ export class SG721 {
 
   @OneToMany(() => Trait, trait => trait.contract)
   traits: Trait[];
+
+  @OneToMany(() => Token, token => token.contract)
+  tokens: Token[];
+
 }
