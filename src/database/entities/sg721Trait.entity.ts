@@ -21,6 +21,7 @@ export class SG721Trait {
   @JoinColumn({ name: 'contract_id' })
   contract: SG721;
 
+  @Exclude()
   @Column({
     type: "varchar",
     length: 1024,
@@ -35,7 +36,8 @@ export class SG721Trait {
   //     name: 'display_type'
   //   })
   //   displayType: string; 
-
+  
+  @Exclude()
   @Column({
     type: "jsonb",
     array: false,

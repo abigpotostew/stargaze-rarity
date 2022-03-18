@@ -26,6 +26,7 @@ export class Token {
     @OneToOne(() => TokenMeta, meta => meta.token, { cascade: true })
     meta: TokenMeta;
 
+    @Exclude()
     @ManyToOne(() => SG721, contract => contract.tokens)
     @JoinColumn({ name: 'contract_id' })
     contract: SG721;
