@@ -10,8 +10,8 @@ interface Trait {
   value: TraitValue;
 }
 
-const getCid=(baseUri:string)=>{
-  return baseUri.replace('ipfs://','')
+const getCid = (baseUri: string) => {
+  return baseUri.replace('ipfs://', '')
 }
 
 export const downloadMetadata = async (sg721Contract: string) => {
@@ -78,7 +78,29 @@ export const downloadMetadata = async (sg721Contract: string) => {
     scores.set(tokenId, score)
   }
 
+  const rankingInfo: { tokenId: string, score: number, numTraits: number, rank: number }[] = [];
+  for (let tokenId of tokenTraits.keys()) {
+    const thisTokenTraits = tokenTraits.get(tokenId)
+    rankingInfo.push({ tokenId, score: scores.get(tokenId), numTraits: thisTokenTraits.length, rank: null })
+  }
+
+  const rankings = new Map<string, number>(
+    rankingInfo
+      .sort((a, b) => {
+        return a.score - b.score || a.numTraits - b.numTraits || parseInt(a.tokenId) - parseInt(b.tokenId)
+      })
+      .reverse()
+      .map((r, i) => [r.tokenId, i + 1] as [string, number])
+  )
+
   // analysis on traits
   console.log('done')
-  return { allTraits, tokenTraits, scores, numTokens, tokenIds: Array.from(tokenTraits.keys()) }
+  return {
+    allTraits,
+    tokenTraits,
+    scores,
+    numTokens,
+    tokenIds: Array.from(tokenTraits.keys()),
+    rankings
+  }
 }

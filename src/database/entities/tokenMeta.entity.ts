@@ -29,4 +29,9 @@ export class TokenMeta {
         type: 'numeric'
     })
     score: number;
+
+    @Column({
+        type: 'numeric'
+    })
+    rank: number;
 }
