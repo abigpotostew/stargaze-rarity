@@ -27,8 +27,15 @@ export class Token {
     meta: TokenMeta;
 
     @ManyToOne(() => SG721, contract => contract.tokens)
-    @JoinColumn({ name: 'contract_id', referencedColumnName: 'contract' })
+    @JoinColumn({ name: 'contract_id', referencedColumnName: 'id' })
     contract: SG721;
+
+    // Keep a normalized field of contract address for fast lookups
+    @Column({
+        type: "varchar",
+        length: 64
+    })
+    contract_address: string;
 
     @OneToMany(() => TokenTrait, trait => trait.token, { cascade: true })
     traits: TokenTrait[];

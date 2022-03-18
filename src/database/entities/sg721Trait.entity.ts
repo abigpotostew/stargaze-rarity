@@ -4,7 +4,7 @@ import { TraitValue } from "../utils/types";
 import { Exclude } from "class-transformer";
 
 @Entity('sg721_traits')
-// @Unique(['contract', 'traitType', 'value']) // this doesn't seem to work with jsonb values
+@Unique(['contract', 'traitType', 'value'])
 export class SG721Trait {
 
   @Exclude()
@@ -17,7 +17,7 @@ export class SG721Trait {
 
   @Exclude()
   @ManyToOne(() => SG721, contract => contract.traits)
-  @JoinColumn({ name: 'contract_id' })
+  @JoinColumn({ name: 'contract_id', referencedColumnName: 'id' })
   contract: SG721;
 
   @Column({

@@ -16,7 +16,7 @@ export class Repository {
 
 
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
-    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract: contractId }, { tokenId: tokenId }], relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract: contractId }, { tokenId: tokenId }], relations: ["meta", "traits", "traits.trait"] });
   }
 
   async getContract(contractId: string): Promise<SG721 | undefined> {
@@ -45,7 +45,6 @@ export class Repository {
     const contractRepo = this.db.manager.getRepository(SG721)
     const c = await contractRepo.findOne({ contract })
     if (c) {
-      // Maybe there is a more concurrent way to do this
       const traits = await this.addContractTraits(c, allTraits)
       const tokens = await this.addTokens(c, tokenTraits, scores, rankings)
       return {
@@ -60,10 +59,12 @@ export class Repository {
     tokenTraits: Map<string, ExtTrait[]>,
     scores: Map<string, number>,
     rankings: Map<string, number>
-    ): Promise<Token[]> {
+  ): Promise<Token[]> {
     const tokensRepo = this.db.manager.getRepository(Token)
     const tokenMetaRepo = this.db.manager.getRepository(TokenMeta)
     const tokenTraitsRepo = this.db.manager.getRepository(TokenTrait)
+
+    console.log("Saving sg721 meta")
 
     const sg721MetaRepo = this.db.manager.getRepository(SG721Meta)
     const sg721Meta = sg721MetaRepo.create()
@@ -95,9 +96,11 @@ export class Repository {
       token.traits = traits
       token.meta = meta
       token.contract = contract
+      token.contract_address = contract.contract
       tokens.push(token)
     }
-
+    console.log("Saving tokens and the rest")
+    
     tokensRepo.save(tokens)
     return tokens;
   }
