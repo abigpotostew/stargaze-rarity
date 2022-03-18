@@ -1,7 +1,7 @@
 
 import { instanceToPlain } from "class-transformer";
 import { ApiResponse } from "./apiResponse";
-import { createContract, readContract, listContracts, readToken } from "./service";
+import { createContract, readContract, listContracts, readToken, listTokens } from "./service";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -40,6 +40,12 @@ const handleListContracts = async (page, limit) => {
     })
 }
 
+const handleListTokens = async (contractId, page, limit) => {
+    return handleReturn(200, async () => {
+        return await listTokens(contractId, page, limit)
+    })
+}
+
 const handleReadToken = async(contractId, tokenId) => {
     return handleReturn(200, async () => {
         return await readToken(contractId, tokenId)
@@ -50,5 +56,6 @@ export {
     handleCreateContract,
     handleReadContract,
     handleListContracts,
-    handleReadToken
+    handleReadToken,
+    handleListTokens
 };

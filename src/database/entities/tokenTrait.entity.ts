@@ -9,7 +9,7 @@ import { Exclude } from "class-transformer";
  * Trying to follow: https://docs.opensea.io/docs/metadata-standards
  */
 @Entity('token_traits')
-@Unique(['contract', 'traitType', 'value'])
+@Unique(['contract', 'token', 'traitType'])
 export class TokenTrait {
 
     @Exclude()

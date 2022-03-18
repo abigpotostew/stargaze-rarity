@@ -19,12 +19,17 @@ export class Repository {
     return await this.db.manager.getRepository(Token).findOne({ where: [{ contract_address: contractId }, { tokenId: tokenId }], relations: ["meta", "traits", "traits.trait"] });
   }
 
+
+  async getTokens(contractId: string, take: number | undefined, skip: number | undefined): Promise<Token[] | undefined> {
+    return await this.db.manager.getRepository(Token).find({ where: [{ contract_address: contractId }], take, skip, relations: ["meta", "traits", "traits.trait"], order: { meta: { score: 'DESC' } } });
+  }
+
   async getContract(contractId: string): Promise<SG721 | undefined> {
-    return await this.db.manager.getRepository(SG721).findOne({ contract: contractId }, { relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(SG721).findOne({ where: [{ contract: contractId }], relations: ["meta", "traits"] });
   }
 
   async getContracts(take: number | undefined, skip: number | undefined): Promise<SG721[] | undefined> {
-    return await this.db.manager.getRepository(SG721).find({ take, skip, relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(SG721).find({ take, skip, relations: ["meta", "traits"], order: { createdAt: 'DESC' } });
   }
 
   async createContract(contractId: string): Promise<SG721> {
