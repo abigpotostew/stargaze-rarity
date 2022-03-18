@@ -39,14 +39,15 @@ export class Repository {
     contract: string,
     allTraits: { [key: string]: Map<TraitValue, number> },
     tokenTraits: Map<string, ExtTrait[]>,
-    scores: Map<string, number>
+    scores: Map<string, number>,
+    rankings: Map<string, number>,
   ) {
     const contractRepo = this.db.manager.getRepository(SG721)
     const c = await contractRepo.findOne({ contract })
     if (c) {
       // Maybe there is a more concurrent way to do this
       const traits = await this.addContractTraits(c, allTraits)
-      const tokens = await this.addTokens(c, tokenTraits, scores)
+      const tokens = await this.addTokens(c, tokenTraits, scores, rankings)
       return {
         traits,
         tokens
@@ -54,7 +55,12 @@ export class Repository {
     }
   }
 
-  async addTokens(contract: SG721, tokenTraits: Map<string, ExtTrait[]>, scores: Map<string, number>): Promise<Token[]> {
+  async addTokens(
+    contract: SG721,
+    tokenTraits: Map<string, ExtTrait[]>,
+    scores: Map<string, number>,
+    rankings: Map<string, number>
+    ): Promise<Token[]> {
     const tokensRepo = this.db.manager.getRepository(Token)
     const tokenMetaRepo = this.db.manager.getRepository(TokenMeta)
     const tokenTraitsRepo = this.db.manager.getRepository(TokenTrait)
@@ -68,6 +74,7 @@ export class Repository {
     const tokens: Token[] = []
     for (let [tokenId, score] of scores) {
       const extTraits: ExtTrait[] = tokenTraits.get(tokenId)
+      const rank: number = rankings.get(tokenId)
       const token = tokensRepo.create()
       token.tokenId = tokenId
 
@@ -83,7 +90,7 @@ export class Repository {
       meta.contract = contract
       meta.token = token
       meta.score = score
-
+      meta.rank = rank
 
       token.traits = traits
       token.meta = meta

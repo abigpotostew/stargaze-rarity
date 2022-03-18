@@ -12,7 +12,13 @@ export const handler: Handler = async (event: any, context: Context) => {
     const contractId = 'stars18a0pvw326fydfdat5tzyf4t8lhz0v6fyfaujpeg07fwqkygcxejsnp5fac'
     const metadata = await downloadMetadata(contractId)    
     const services = await getServicesSingleton()
-    const output = services.repo.persistIngestedData(contractId, metadata.allTraits, metadata.tokenTraits, metadata.scores)
+    const output = services.repo.persistIngestedData(
+        contractId,
+        metadata.allTraits,
+        metadata.tokenTraits,
+        metadata.scores,
+        metadata.rankings,
+        )
     return {
         statusCode:200,
         body: JSON.stringify(output)
