@@ -27,7 +27,7 @@ export class Token {
     meta: TokenMeta;
 
     @ManyToOne(() => SG721, contract => contract.tokens)
-    @JoinColumn({ name: 'contract_id'})
+    @JoinColumn({ name: 'contract_id' })
     contract: SG721;
 
     // Keep a normalized field of contract address for fast lookups

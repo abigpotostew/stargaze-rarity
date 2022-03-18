@@ -18,7 +18,7 @@ export class SG721Trait {
 
   @Exclude()
   @ManyToOne(() => SG721, contract => contract.traits)
-  @JoinColumn({ name: 'contract_id'})
+  @JoinColumn({ name: 'contract_id' })
   contract: SG721;
 
   @Column({

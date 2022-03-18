@@ -46,7 +46,7 @@ const handleListTokens = async (contractId, page, limit) => {
     })
 }
 
-const handleReadToken = async(contractId, tokenId) => {
+const handleReadToken = async (contractId, tokenId) => {
     return handleReturn(200, async () => {
         return await readToken(contractId, tokenId)
     })

@@ -17,12 +17,12 @@ export class TokenMeta {
 
     @Exclude()
     @ManyToOne(() => SG721)
-    @JoinColumn({ name: 'contract_id'})
+    @JoinColumn({ name: 'contract_id' })
     contract: SG721;
 
     @Exclude()
     @OneToOne(() => Token, token => token.meta)
-    @JoinColumn({ name: 'token_id'})
+    @JoinColumn({ name: 'token_id' })
     token: Token;
 
     @Column({

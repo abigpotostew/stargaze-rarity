@@ -16,7 +16,7 @@ export class SG721Meta {
 
     @Exclude()
     @ManyToOne(() => SG721)
-    @JoinColumn({ name: 'contract_id'})
+    @JoinColumn({ name: 'contract_id' })
     contract: SG721;
 
     @Column({
