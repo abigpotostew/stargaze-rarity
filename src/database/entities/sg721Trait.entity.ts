@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { SG721 } from "./sg721.entity";
 import { TraitValue } from "../utils/types";
 import { Exclude } from "class-transformer";
+import { TokenTrait } from "./tokenTrait.entity";
 
 @Entity('sg721_traits')
 @Unique(['contract', 'traitType', 'value'])
@@ -17,7 +18,7 @@ export class SG721Trait {
 
   @Exclude()
   @ManyToOne(() => SG721, contract => contract.traits)
-  @JoinColumn({ name: 'contract_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'contract_id'})
   contract: SG721;
 
   @Column({
@@ -46,4 +47,8 @@ export class SG721Trait {
     type: "integer"
   })
   count: number
+
+
+  @OneToMany(() => TokenTrait, tokenTrait => tokenTrait.trait)
+  tokenTraits: SG721Trait[];
 }

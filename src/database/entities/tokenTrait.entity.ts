@@ -22,7 +22,7 @@ export class TokenTrait {
 
     @Exclude()
     @ManyToOne(() => SG721)
-    @JoinColumn({ name: 'contract_id', referencedColumnName: 'id' })
+    @JoinColumn({ name: 'contract_id'})
     contract: SG721;
 
     @Exclude()
@@ -52,12 +52,8 @@ export class TokenTrait {
     //   })
     //   displayType: string; 
 
-    @OneToOne(() => SG721Trait)
-    @JoinColumn([
-        { name: 'contract_id', referencedColumnName: 'contract' },
-        { name: 'trait_type', referencedColumnName: 'traitType' },
-        { name: 'value', referencedColumnName: 'value' }
-    ])
+    @ManyToOne(() => SG721Trait, sg721Trait => sg721Trait.tokenTraits)      
+    @JoinColumn({ name: 'trait_id' }) 
     trait: SG721Trait;
 
 }

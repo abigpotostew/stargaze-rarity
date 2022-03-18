@@ -14,8 +14,7 @@ export class SG721 {
 
   @Column({
     type: "varchar",
-    length: 64,
-    unique: true
+    length: 64
   })
   contract: string; // Probably want to validate that it is a stars... address    
 

@@ -16,7 +16,7 @@ export class Repository {
 
 
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
-    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract: contractId }, { tokenId: tokenId }], relations: ["meta", "traits", "traits.trait"] });
+    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract_address: contractId }, { tokenId: tokenId }], relations: ["meta", "traits", "traits.trait"] });
   }
 
   async getContract(contractId: string): Promise<SG721 | undefined> {
@@ -100,7 +100,6 @@ export class Repository {
       tokens.push(token)
     }
     console.log("Saving tokens and the rest")
-    
     tokensRepo.save(tokens)
     return tokens;
   }
