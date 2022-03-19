@@ -27,6 +27,7 @@ export class TokenTraitModel {
     trait: SG721TraitModel;
 
     @Expose()
+    @Type(() => Number)
     @Transform(({obj}) => obj.trait.count, {toClassOnly: true})
     count: number
 

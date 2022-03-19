@@ -13,6 +13,7 @@ export class SG721SimpleModel {
   createdAt: Date;
 
   @Expose()
+  @Type(() => Number)
   @Transform(({obj}) => obj.meta.count, {toClassOnly: true})
   count: number;
 
