@@ -17,17 +17,17 @@ export class TokenModel {
 
     @Expose()
     @Type(() => Number)
-    @Transform(({obj}) => obj.meta.score, {toClassOnly: true})
+    @Transform(({obj}) => obj?.meta?.score, {toClassOnly: true})
     score: number;
 
     @Expose()
     @Type(() => Number)
-    @Transform(({obj}) => obj.meta.rank, {toClassOnly: true})
+    @Transform(({obj}) => obj?.meta?.rank, {toClassOnly: true})
     rank: number;
 
     @Expose()
     @Type(() => Number)
-    @Transform(({obj}) => obj.contract.meta.count, {toClassOnly: true})
+    @Transform(({obj}) => obj?.contract?.meta?.count, {toClassOnly: true})
     total: number;
 
     @Exclude()

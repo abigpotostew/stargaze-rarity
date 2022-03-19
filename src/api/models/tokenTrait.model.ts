@@ -1,4 +1,3 @@
-
 import { Exclude, Expose, Transform, Type } from "class-transformer";
 import { SG721Model } from "./sg721.model";
 import { SG721TraitModel } from "./sg721Trait.model";
@@ -28,7 +27,7 @@ export class TokenTraitModel {
 
     @Expose()
     @Type(() => Number)
-    @Transform(({obj}) => obj.trait.count, {toClassOnly: true})
+    @Transform(({obj}) => obj?.trait?.count, {toClassOnly: true})
     count: number
 
 }
