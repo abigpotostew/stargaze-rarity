@@ -1,6 +1,5 @@
 import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { SG721Trait } from "./sg721Trait.entity";
-import { Exclude } from "class-transformer";
 import { Token } from "./token.entity";
 import { SG721Meta } from "./sg721Meta.entity";
 
@@ -8,7 +7,6 @@ import { SG721Meta } from "./sg721Meta.entity";
 @Entity('sg721s')
 export class SG721 {
 
-  @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 
