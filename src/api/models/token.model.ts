@@ -1,4 +1,5 @@
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { SG721Model } from './sg721.model';
 import { TokenMetaModel } from './tokenMeta.model';
 import { TokenTraitModel } from './tokenTrait.model';
 
@@ -24,12 +25,18 @@ export class TokenModel {
     @Transform(({obj}) => obj.meta.rank, {toClassOnly: true})
     rank: number;
 
+    @Expose()
+    @Type(() => Number)
+    @Transform(({obj}) => obj.contract.meta.count, {toClassOnly: true})
+    total: number;
+
     @Exclude()
     @Type(() => TokenMetaModel)
     meta: TokenMetaModel;
 
     @Exclude()
-    contract: any;
+    @Type(() => SG721Model)
+    contract: SG721Model;
 
     @Exclude()
     contract_address: string;
