@@ -5,6 +5,7 @@ import "reflect-metadata"
 dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
+const isOffline = process.env.SLS_OFFLINE || false
 console.log("Environment", env)
 const dataSource = new DataSource({
     type: 'postgres',
@@ -14,18 +15,10 @@ const dataSource = new DataSource({
     password: process.env.POSTGRESQL_PASSWORD,
     database: process.env.POSTGRESQL_DATABASE,
     migrations: [
-        // env === 'production'
-        //     ? '.build/src/database/migrations/*{.ts,.js}'
-        //     : 'src/database/migrations/*{.ts,.js}',
-        'src/database/migrations/*{.ts,.js}'
-        // '.build/src/database/migrations/*{.ts,.js}'
+        isOffline ? '.build/src/database/migrations/*{.ts,.js}' :  'src/database/migrations/*{.ts,.js}'
     ],
     entities: [
-        // env === 'production' ?
-        // '.build/src/database/entities/*{.ts,.js}' :
-        // 'src/database/entities/*{.ts,.js}',
-        // '.build/src/database/entities/*.js'
-        'src/database/entities/*{.ts,.js}'
+        isOffline ? '.build/src/database/entities/*.js' : 'src/database/entities/*{.ts,.js}'
     ],
     cli: {
         entitiesDir: 'src/database/entities',
