@@ -14,7 +14,7 @@ export class SG721SimpleModel {
 
   @Expose()
   @Type(() => Number)
-  @Transform(({obj}) => obj.meta.count, {toClassOnly: true})
+  @Transform(({obj}) => obj?.meta?.count, {toClassOnly: true})
   count: number;
 
   @Exclude()

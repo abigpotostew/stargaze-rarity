@@ -1,5 +1,5 @@
 import { SG721 } from "./database/entities/sg721.entity";
-import { Connection } from "typeorm";
+import { DataSource } from "typeorm";
 import { TraitValue, ExtTrait } from "./database/utils/types";
 import { SG721Trait } from "./database/entities/sg721Trait.entity";
 import { Token } from "./database/entities/token.entity";
@@ -8,9 +8,9 @@ import { TokenTrait } from "./database/entities/tokenTrait.entity";
 import { SG721Meta } from "./database/entities/sg721Meta.entity";
 
 export class Repository {
-  private readonly db: Connection;
+  private readonly db: DataSource;
 
-  constructor(db: Connection) {
+  constructor(db: DataSource) {
     this.db = db;
   }
 
@@ -21,7 +21,7 @@ export class Repository {
 
 
   async getTokens(contractId: string, take: number | undefined, skip: number | undefined): Promise<Token[] | undefined> {
-    return await this.db.manager.getRepository(Token).find({ where: [{ contract_address: contractId }], take, skip, relations: ["meta", "traits", "traits.trait"], order: { meta: { score: 'DESC' } } });
+    return await this.db.manager.getRepository(Token).find({ where: [{ contract_address: contractId }], take, skip, relations: ["meta", "traits", "traits.trait", "contract.meta"], order: { meta: { score: 'DESC' } } });
   }
 
   async getContract(contractId: string): Promise<SG721 | undefined> {
