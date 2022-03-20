@@ -21,9 +21,20 @@ provider:
       Action: sns:Publish`
       Resource:
         - Ref: MetadataTopic  
+  vpc: 
+    securityGroupIds: 
+      - sg-60fddd05
+    subnetIds:
+      - subnet-31f0920b
+      - subnet-8b32c0d2
+      - subnet-b55585c2
+      - subnet-c75510a2
+      - subnet-139c8e3b
+      - subnet-66bc2e6a         
 
 functions:
   api:
+    timeout: 20
     handler: api.handler
     events:
       - httpApi:
@@ -42,6 +53,7 @@ functions:
           path: /contracts/{contractId}/rarities/{tokenId}
           method: get          
   metadata:
+    timeout: 600 # 10 minutes should be enough to grab everything?
     handler: metadata.handler
     events:
       - httpApi:
@@ -56,6 +68,8 @@ functions:
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
+  - serverless-dotenv-plugin
+
 #  - serverless-pseudo-parameters
 
 resources:

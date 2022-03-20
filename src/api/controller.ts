@@ -17,17 +17,18 @@ const convertModel = function <T, V>(klass: ClassConstructor<T>, obj: V): T | nu
 }
 
 const handleReturn = async (statusCode: number, callback: () => any): Promise<ApiResponse> => {
+    let payload
     try {
         const result = await callback();
         if (result === null || result === undefined) {
             const message = "Resource not found"
-            return {
+            payload =  {
                 statusCode: 404,
                 body: toJson({ message })
             }
         }
         else {
-            return {
+            payload =  {
                 statusCode,
                 body: toJson(result),
             }
@@ -35,11 +36,15 @@ const handleReturn = async (statusCode: number, callback: () => any): Promise<Ap
     } catch (e) {
         console.log(e)
         const { message } = e
-        return {
+        payload =  {
             statusCode: 400,
             body: toJson({ message })
         }
     }
+    payload.headers = {
+        "Content-Type": "application/json"
+    }
+    return payload
 }
 
 const handleCreateContract = async (contractId): Promise<ApiResponse> => {

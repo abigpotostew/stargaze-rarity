@@ -16,7 +16,7 @@ export class Repository {
 
 
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
-    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract_address: contractId }, { tokenId: tokenId }], relations: ["meta", "traits", "traits.trait", "contract.meta"] });
+    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract_address: contractId, tokenId: tokenId }], relations: ["meta", "traits", "traits.trait", "contract.meta"] });
   }
 
 
