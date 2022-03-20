@@ -3,7 +3,7 @@ import { SG721 } from './sg721.entity';
 import { Token } from './token.entity';
 
 @Entity('token_meta')
-@Unique(['token', 'contract'])
+@Unique('token_meta_unique_token_contract',['token', 'contract'])
 export class TokenMeta {
 
     @PrimaryGeneratedColumn()

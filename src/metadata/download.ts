@@ -26,7 +26,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
 
   const allTraits: { [key: string]: Map<TraitValue, number> } = {};
   const tokenTraits = new Map<string, Trait[]>();
-  const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl]
+  const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl,config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
   await asyncPool(15, [...Array(contractInfo.totalSupply).keys()], async (i: number) => {
     i = i + 1;
     let metadata = await fetchMetadata(gateways, cid, i.toString())

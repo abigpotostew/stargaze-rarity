@@ -14,15 +14,12 @@ const dataSource = new DataSource({
     username: process.env.POSTGRESQL_USERNAME,
     password: process.env.POSTGRESQL_PASSWORD,
     database: process.env.POSTGRESQL_DATABASE,
-    migrations: [
-        isOffline ? '.build/src/database/migrations/*{.ts,.js}' :  'src/database/migrations/*{.ts,.js}'
-    ],
+    synchronize: true,
     entities: [
         isOffline ? '.build/src/database/entities/*.js' : 'src/database/entities/*{.ts,.js}'
     ],
     cli: {
         entitiesDir: 'src/database/entities',
-        migrationsDir: 'src/database/migrations',
         subscribersDir: 'src/database/subscribers',
     },
 })

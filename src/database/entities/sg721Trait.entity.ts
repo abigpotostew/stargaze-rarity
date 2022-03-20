@@ -4,7 +4,7 @@ import { TraitValue } from "../utils/types";
 import { TokenTrait } from "./tokenTrait.entity";
 
 @Entity('sg721_traits')
-@Unique(['contract', 'traitType', 'value'])
+@Unique('sg721_traits_unique',['contract', 'traitType', 'value'] )
 export class SG721Trait {
 
   @PrimaryGeneratedColumn()

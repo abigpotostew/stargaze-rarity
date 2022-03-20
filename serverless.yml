@@ -6,6 +6,16 @@ service: stargaze-rarity
 frameworkVersion: '3'
 custom:
     metadataTopic: ${self:service}-${opt:stage, 'dev'}-metadata-topic #This is the global name of the topic
+    scripts:
+      hooks:
+        'after:package:createDeploymentArtifacts': >
+          printf "[after:package:createDeploymentArtifacts hook] Removing development dependencies " &&
+          (cd .serverless && unzip -qq stargaze-rarity.zip -d stargaze-rarity)          && printf "." &&
+          (cd .serverless && rm -rf stargaze-rarity/node_modules)                       && printf "." &&
+          (cd .serverless/stargaze-rarity && npm install --only=prod > /dev/null 2>&1)  && printf "." &&
+          (cd .serverless/stargaze-rarity/ && zip -q -FSr ../stargaze-rarity.zip .)     && printf ".\n" &&
+          rm -rf .serverless/stargaze-rarity/ &&
+          printf "[after:package:createDeploymentArtifacts hook] Done\n"
 
 provider:
   name: aws
@@ -16,21 +26,23 @@ provider:
     #postgresql
 #    POSTGRESQL_HOST: ${self:custom.POSTGRESQL.HOST}
 #    POSTGRESQL_PORT: ${self:custom.POSTGRESQL.PORT}
-  iamRoleStatements:    
-    - Effect: Allow
-      Action: sns:Publish`
-      Resource:
-        - Ref: MetadataTopic  
-  vpc: 
-    securityGroupIds: 
-      - sg-60fddd05
-    subnetIds:
-      - subnet-31f0920b
-      - subnet-8b32c0d2
-      - subnet-b55585c2
-      - subnet-c75510a2
-      - subnet-139c8e3b
-      - subnet-66bc2e6a         
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: sns:Publish
+          Resource:
+            - Ref: MetadataTopic
+#  vpc: 
+#    securityGroupIds: 
+#      - sg-60fddd05
+#    subnetIds:
+#      - subnet-31f0920b
+#      - subnet-8b32c0d2
+#      - subnet-b55585c2
+#      - subnet-c75510a2
+#      - subnet-139c8e3b
+#      - subnet-66bc2e6a         
 
 functions:
   api:
@@ -53,7 +65,7 @@ functions:
           path: /contracts/{contractId}/rarities/{tokenId}
           method: get          
   metadata:
-    timeout: 600 # 10 minutes should be enough to grab everything?
+    timeout: 1200 # 20 minutes, because uncached ipfs files take a while to download
     handler: metadata.handler
     events:
       - httpApi:
@@ -69,6 +81,7 @@ plugins:
   - serverless-plugin-typescript
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-plugin-scripts
 
 #  - serverless-pseudo-parameters
 

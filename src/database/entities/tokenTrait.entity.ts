@@ -8,7 +8,7 @@ import { TraitValue } from "../utils/types";
  * Trying to follow: https://docs.opensea.io/docs/metadata-standards
  */
 @Entity('token_traits')
-@Unique(['contract', 'token', 'traitType'])
+@Unique('token_traits_contract_token_trait_type_unique',['contract', 'token', 'traitType'])
 export class TokenTrait {
 
     @PrimaryGeneratedColumn()

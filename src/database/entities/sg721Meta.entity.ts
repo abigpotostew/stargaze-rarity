@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, Prim
 import { SG721 } from './sg721.entity';
 
 @Entity('sg721_meta')
-@Unique(['contract'])
+@Unique('sg721_meta_unique_contract',['contract'])
 export class SG721Meta {
 
     @PrimaryGeneratedColumn()
@@ -11,7 +11,7 @@ export class SG721Meta {
     @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
     createdAt: Date;
 
-    @ManyToOne(() => SG721)
+    @OneToOne(() => SG721, (sg721) => sg721.meta)
     @JoinColumn({ name: 'contract_id' })
     contract: SG721;
 

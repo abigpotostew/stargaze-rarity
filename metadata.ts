@@ -9,10 +9,14 @@ const region = process.env.AWS_REGION
 
 export const handler: Handler = async (event: any, context: Context) => {
     // console.log(event, context)
-    const contractId = 'stars18a0pvw326fydfdat5tzyf4t8lhz0v6fyfaujpeg07fwqkygcxejsnp5fac'
+    console.log("EVENT",event)
+    console.log("CONTEXT",context)
+    // const contractId = 'stars1ltd0maxmte3xf4zshta9j5djrq9cl692ctsp9u5q0p9wss0f5lmsvd9ukk'
+    const contractId = 'stars18a0pvw326fydfdat5tzyf4t8lhz0v6fyfaujpeg07fwqkygcxejsnp5fac'//stew
+    console.log('testing contract', contractId)
     const metadata = await downloadMetadata(contractId)    
     const services = await getServicesSingleton()
-    const output = services.repo.persistIngestedData(
+    const output = await services.repo.persistIngestedData(
         contractId,
         metadata.allTraits,
         metadata.tokenTraits,
@@ -21,7 +25,6 @@ export const handler: Handler = async (event: any, context: Context) => {
         )
     return {
         statusCode:200,
-        body: JSON.stringify(output)
+        body: JSON.stringify({traits:output.traits.length, tokens:output.tokens.length})
     }
-    
 }

@@ -1,11 +1,16 @@
 import { SG721 } from "./database/entities/sg721.entity";
-import { DataSource } from "typeorm";
-import { TraitValue, ExtTrait } from "./database/utils/types";
+import { DataSource, In } from "typeorm";
+import { ExtTrait, TraitValue } from "./database/utils/types";
 import { SG721Trait } from "./database/entities/sg721Trait.entity";
 import { Token } from "./database/entities/token.entity";
 import { TokenMeta } from "./database/entities/tokenMeta.entity";
 import { TokenTrait } from "./database/entities/tokenTrait.entity";
 import { SG721Meta } from "./database/entities/sg721Meta.entity";
+import { saveChunked } from "./database/insert-chunk";
+
+const cacheOpts={
+  cache:60000,
+}
 
 export class Repository {
   private readonly db: DataSource;
@@ -16,20 +21,43 @@ export class Repository {
 
 
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
-    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract_address: contractId, tokenId: tokenId }], relations: ["meta", "traits", "traits.trait", "contract.meta"] });
+    return await this.db.manager.getRepository(Token).findOne({
+      where: [{
+        contract_address: contractId,
+        tokenId: tokenId
+      }], relations: ["meta", "traits", "traits.trait", "contract.meta"],
+      ...cacheOpts,
+    });
   }
 
 
   async getTokens(contractId: string, take: number | undefined, skip: number | undefined): Promise<Token[] | undefined> {
-    return await this.db.manager.getRepository(Token).find({ where: [{ contract_address: contractId }], take, skip, relations: ["meta", "traits", "traits.trait", "contract.meta"], order: { meta: { score: 'DESC' } } });
+    return await this.db.manager.getRepository(Token).find({
+      where: [{ contract_address: contractId }],
+      take,
+      skip,
+      relations: ["meta", "traits", "traits.trait", "contract.meta"],
+      order: { meta: { score: 'DESC' } },
+      ...cacheOpts,
+    });
   }
 
   async getContract(contractId: string): Promise<SG721 | undefined> {
-    return await this.db.manager.getRepository(SG721).findOne({ where: [{ contract: contractId }], relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(SG721).findOne({
+      where: [{ contract: contractId }],
+      relations: ["meta", "traits"],
+      ...cacheOpts,
+    });
   }
 
   async getContracts(take: number | undefined, skip: number | undefined): Promise<SG721[] | undefined> {
-    return await this.db.manager.getRepository(SG721).find({ take, skip, relations: ["meta", "traits"], order: { createdAt: 'DESC' } });
+    return await this.db.manager.getRepository(SG721).find({
+      take,
+      skip,
+      relations: ["meta", "traits"],
+      order: { createdAt: 'DESC' },
+      ...cacheOpts,
+    });
   }
 
   async createContract(contractId: string): Promise<SG721> {
@@ -77,7 +105,11 @@ export class Repository {
     const sg721Meta = sg721MetaRepo.create()
     sg721Meta.contract = contract
     sg721Meta.count = scores.size
-    sg721MetaRepo.save(sg721Meta)
+    await saveChunked(sg721MetaRepo, SG721Meta, [sg721Meta], '"sg721_meta_unique_contract"', false,
+      `count = EXCLUDED.count
+      WHERE (sg721_meta.count) is distinct from (EXCLUDED.count)`)
+
+    // await sg721MetaRepo.save(sg721Meta)
 
     const tokens: Token[] = []
     for (let [tokenId, score] of scores) {
@@ -107,19 +139,56 @@ export class Repository {
       tokens.push(token)
     }
     console.log("Saving tokens and the rest")
-    await tokensRepo.save(tokens)
+
+    let i: number, j: number;
+    const chunkSize = 250;
+    for (i = 0, j = tokens.length; i < j; i += chunkSize) {
+      const chunk = tokens.slice(i, i + chunkSize);
+      await saveChunked(tokensRepo, Token, chunk, '"token_unique_id_contract"', true, undefined, chunkSize)
+      const tokenWithId = await tokensRepo.find({where: {tokenId: In(chunk.map(t => t.tokenId))}})
+      const idMap = tokenWithId.reduce((acc, t) => {
+        acc[t.tokenId] = t.id
+        return acc
+      }, {} as { [key: string]: number })
+      for (let token of tokens) {
+        token.id = idMap[token.tokenId]
+      }
+      await saveChunked(tokenMetaRepo, TokenMeta, chunk.map(t => t.meta), '"token_meta_unique_token_contract"', false,
+        `
+        rank = EXCLUDED.rank, 
+        score = EXCLUDED.score 
+        WHERE (
+        token_meta.rank, 
+        token_meta.score) 
+        is distinct from (
+        EXCLUDED.rank,
+        EXCLUDED.score)`,
+        chunkSize)
+      await saveChunked(tokenTraitsRepo, TokenTrait, chunk.map(t => t.traits).flat(), '"token_traits_contract_token_trait_type_unique"', false,
+        `
+        value = EXCLUDED.value 
+        WHERE (
+        token_traits.value
+        ) 
+        is distinct from (
+        EXCLUDED.value)`,
+        chunkSize)
+      
+    }
+
+    // await tokensRepo.save(tokens, { chunk: 250 })
+
 
     console.log("running update")
     // Update token traits
     // At some point we should migrate this to typeorm
     // but I was too lazy
     const sqlQuery = `
-    UPDATE token_traits t
-      SET    trait_id = s.id
-      FROM   sg721_traits s
-      WHERE  s.trait_type = t.trait_type
-            AND s.value = t.value
-            AND s.contract_id = t.contract_id 
+        UPDATE token_traits t
+        SET trait_id = s.id FROM   sg721_traits s
+        WHERE s.trait_type = t.trait_type
+          AND s.value = t.value
+          AND s.contract_id = t.contract_id
     `
     await this.db.manager.query(sqlQuery);
 
@@ -129,7 +198,6 @@ export class Repository {
 
   async addContractTraits(contract: SG721, allTraits: { [key: string]: Map<TraitValue, number> }): Promise<SG721Trait[]> {
     const traitsRepo = this.db.manager.getRepository(SG721Trait)
-    this.db.manager.connection.createQueryBuilder
     const traits: SG721Trait[] = []
     for (let traitType in allTraits) {
       for (let [traitValue, count] of allTraits[traitType]) {
@@ -141,8 +209,12 @@ export class Repository {
         traits.push(trait)
       }
     }
+
     console.log(traits)
-    await traitsRepo.insert(traits);
+    await saveChunked(traitsRepo, SG721Trait, traits, '"sg721_traits_unique"', false, `
+    count = EXCLUDED.count
+      WHERE (sg721_traits.count) is distinct from (EXCLUDED.count)`, 500)
+    // await traitsRepo.insert(traits);
     return traits;
   }
 }

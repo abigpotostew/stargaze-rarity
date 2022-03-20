@@ -4,7 +4,7 @@ import { TokenMeta } from './tokenMeta.entity';
 import { TokenTrait } from './tokenTrait.entity';
 
 @Entity('tokens')
-@Unique(['tokenId', 'contract'])
+@Unique('token_unique_id_contract',['tokenId', 'contract'])
 export class Token {
 
     @PrimaryGeneratedColumn()
