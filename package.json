@@ -7,12 +7,13 @@
     "@cosmjs/cli": "^0.27.1",
     "@types/dotenv": "^8.2.0",
     "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
     "cosmwasm": "^1.0.3",
     "fetch-retry": "^5.0.2",
     "node-fetch": "^2.6.7",
     "pg": "^8.7.3",
     "tiny-async-pool": "^1.2.0",
-    "typeorm": "^0.2.45"
+    "typeorm": "^0.3.0"
   },
   "scripts": {
     "start": "sls offline --printOutput",

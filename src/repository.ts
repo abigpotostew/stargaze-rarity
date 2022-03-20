@@ -16,15 +16,20 @@ export class Repository {
 
 
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
-    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract: contractId }, { tokenId: tokenId }], relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(Token).findOne({ where: [{ contract_address: contractId }, { tokenId: tokenId }], relations: ["meta", "traits", "traits.trait", "contract.meta"] });
+  }
+
+
+  async getTokens(contractId: string, take: number | undefined, skip: number | undefined): Promise<Token[] | undefined> {
+    return await this.db.manager.getRepository(Token).find({ where: [{ contract_address: contractId }], take, skip, relations: ["meta", "traits", "traits.trait"], order: { meta: { score: 'DESC' } } });
   }
 
   async getContract(contractId: string): Promise<SG721 | undefined> {
-    return await this.db.manager.getRepository(SG721).findOne({ contract: contractId }, { relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(SG721).findOne({ where: [{ contract: contractId }], relations: ["meta", "traits"] });
   }
 
   async getContracts(take: number | undefined, skip: number | undefined): Promise<SG721[] | undefined> {
-    return await this.db.manager.getRepository(SG721).find({ take, skip, relations: ["meta", "traits"] });
+    return await this.db.manager.getRepository(SG721).find({ take, skip, relations: ["meta", "traits"], order: { createdAt: 'DESC' } });
   }
 
   async createContract(contractId: string): Promise<SG721> {
@@ -43,9 +48,8 @@ export class Repository {
     rankings: Map<string, number>,
   ) {
     const contractRepo = this.db.manager.getRepository(SG721)
-    const c = await contractRepo.findOne({ contract })
+    const c = await contractRepo.findOne({ where: { contract } })
     if (c) {
-      // Maybe there is a more concurrent way to do this
       const traits = await this.addContractTraits(c, allTraits)
       const tokens = await this.addTokens(c, tokenTraits, scores, rankings)
       return {
@@ -60,12 +64,16 @@ export class Repository {
     tokenTraits: Map<string, ExtTrait[]>,
     scores: Map<string, number>,
     rankings: Map<string, number>
-    ): Promise<Token[]> {
+  ): Promise<Token[]> {
     const tokensRepo = this.db.manager.getRepository(Token)
     const tokenMetaRepo = this.db.manager.getRepository(TokenMeta)
     const tokenTraitsRepo = this.db.manager.getRepository(TokenTrait)
-
     const sg721MetaRepo = this.db.manager.getRepository(SG721Meta)
+    const sg721TraitsRepo = this.db.manager.getRepository(SG721Trait)
+
+    console.log("Saving sg721 meta")
+
+
     const sg721Meta = sg721MetaRepo.create()
     sg721Meta.contract = contract
     sg721Meta.count = scores.size
@@ -95,10 +103,27 @@ export class Repository {
       token.traits = traits
       token.meta = meta
       token.contract = contract
+      token.contract_address = contract.contract
       tokens.push(token)
     }
+    console.log("Saving tokens and the rest")
+    await tokensRepo.save(tokens)
 
-    tokensRepo.save(tokens)
+    console.log("running update")
+    // Update token traits
+    // At some point we should migrate this to typeorm
+    // but I was too lazy
+    const sqlQuery = `
+    UPDATE token_traits t
+      SET    trait_id = s.id
+      FROM   sg721_traits s
+      WHERE  s.trait_type = t.trait_type
+            AND s.value = t.value
+            AND s.contract_id = t.contract_id 
+    `
+    await this.db.manager.query(sqlQuery);
+
+    console.log("Finished persisting")
     return tokens;
   }
 

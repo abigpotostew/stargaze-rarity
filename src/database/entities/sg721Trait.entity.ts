@@ -1,21 +1,18 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { SG721 } from "./sg721.entity";
 import { TraitValue } from "../utils/types";
-import { Exclude } from "class-transformer";
+import { TokenTrait } from "./tokenTrait.entity";
 
 @Entity('sg721_traits')
-// @Unique(['contract', 'traitType', 'value']) // this doesn't seem to work with jsonb values
+@Unique(['contract', 'traitType', 'value'])
 export class SG721Trait {
 
-  @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Exclude()
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
 
-  @Exclude()
   @ManyToOne(() => SG721, contract => contract.traits)
   @JoinColumn({ name: 'contract_id' })
   contract: SG721;
@@ -34,7 +31,7 @@ export class SG721Trait {
   //     name: 'display_type'
   //   })
   //   displayType: string; 
-
+  
   @Column({
     type: "jsonb",
     array: false,
@@ -46,4 +43,8 @@ export class SG721Trait {
     type: "integer"
   })
   count: number
+
+
+  @OneToMany(() => TokenTrait, tokenTrait => tokenTrait.trait)
+  tokenTraits: SG721Trait[];
 }

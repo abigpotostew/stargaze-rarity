@@ -2,7 +2,7 @@ import { PublishCommand, PublishCommandInput, SNSClient } from "@aws-sdk/client-
 import { Handler } from 'aws-lambda';
 import * as dotenv from 'dotenv';
 import { ApiResponse, isOk } from "./src/api/apiResponse";
-import { handleCreateContract, handleReadContract,handleListContracts, handleReadToken } from "./src/api/controller";
+import { handleCreateContract, handleReadContract, handleListContracts, handleReadToken, handleListTokens } from "./src/api/controller";
 import { Services } from "./src/services";
 
 dotenv.config();
@@ -37,7 +37,7 @@ export const handler: Handler = async (event: any) => {
     const { routeKey } = event
     switch (routeKey) {
       case 'GET /contracts': {
-        const {page, limit} = event.queryStringParameters
+        const { page, limit } = Object(event.queryStringParameters)
         const response: ApiResponse = await handleListContracts(page, limit)
         return response
       }
@@ -58,7 +58,10 @@ export const handler: Handler = async (event: any) => {
       }
 
       case 'GET /contracts/{contractId}/rarities': {
-        return {}
+        const { page, limit } = Object(event.queryStringParameters)
+        const { pathParameters: { contractId } } = event
+        const response: ApiResponse = await handleListTokens(contractId, page, limit)
+        return response
       }
 
       case 'GET /contracts/{contractId}/rarities/{tokenId}': {

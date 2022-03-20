@@ -34,6 +34,7 @@ export class TokenSchema1647555340241 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "token_traits"`);
         await queryRunner.query(`DROP TABLE "token_meta"`);
         await queryRunner.query(`DROP TABLE "sg721_traits"`);
+        await queryRunner.query(`drop table if exists "traits"`);
         await queryRunner.query(`create table traits
         (
             id          SERIAL PRIMARY KEY,
