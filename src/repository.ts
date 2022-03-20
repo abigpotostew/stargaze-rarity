@@ -210,7 +210,6 @@ export class Repository {
       }
     }
 
-    console.log(traits)
     await saveChunked(traitsRepo, SG721Trait, traits, '"sg721_traits_unique"', false, `
     count = EXCLUDED.count
       WHERE (sg721_traits.count) is distinct from (EXCLUDED.count)`, 500)

@@ -65,7 +65,7 @@ functions:
           path: /contracts/{contractId}/rarities/{tokenId}
           method: get          
   metadata:
-    timeout: 1200 # 20 minutes, because uncached ipfs files take a while to download
+    timeout: 900 # 15 minutes, because uncached ipfs files take a while to download
     handler: metadata.handler
     events:
       - httpApi:

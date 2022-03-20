@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { ApiResponse, isOk } from "./src/api/apiResponse";
 import { handleCreateContract, handleReadContract, handleListContracts, handleReadToken, handleListTokens } from "./src/api/controller";
 import { Services } from "./src/services";
+import { createContractMessage } from "./src/message";
 
 dotenv.config();
 
@@ -46,7 +47,7 @@ export const handler: Handler = async (event: any) => {
         const { pathParameters: { contractId } } = event
         const response: ApiResponse = await handleCreateContract(contractId)
         if (isOk(response)) {
-          await publishSnsTopic({ contractId })
+          await publishSnsTopic(createContractMessage( contractId ))
         }
         return response;
       }

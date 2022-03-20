@@ -27,15 +27,16 @@ export const downloadMetadata = async (sg721Contract: string) => {
   const allTraits: { [key: string]: Map<TraitValue, number> } = {};
   const tokenTraits = new Map<string, Trait[]>();
   const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl,config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
-  await asyncPool(15, [...Array(contractInfo.totalSupply).keys()], async (i: number) => {
+  await asyncPool(config.concurrentIPFSDownloads, [...Array(contractInfo.totalSupply).keys()], async (i: number) => {
     i = i + 1;
     let metadata = await fetchMetadata(gateways, cid, i.toString())
     if (!metadata) {
       throw new Error(`Failed to fetch token metadata ${i}`)
     }
     let traits: Trait[] = [];
-    if (Array.isArray(metadata.traits)) {
-      traits = metadata.traits as Trait[]
+    const attributes = metadata.traits || metadata.attributes;
+    if (Array.isArray(attributes)) {
+      traits = attributes as Trait[]
     }
 
     // save to db here?

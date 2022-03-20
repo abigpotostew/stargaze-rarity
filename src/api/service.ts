@@ -11,6 +11,10 @@ const createContract = async (contractId: string): Promise<SG721> => {
         services = await getServicesSingleton()
     }
 
+    const existing =await services.repo.getContract(contractId) 
+    if(existing) {
+        return existing
+    }
     await services.repo.createContract(contractId)
     return services.repo.getContract(contractId)
 }

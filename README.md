@@ -70,3 +70,13 @@ Notes on the functionality:
 - Nfts are minted sequentially. Any gaps will result in a failure.
 - if one nft doesn't have a trait that others have, that is still considered in the rarity score for that one.
 - 
+
+---
+
+testing:
+hyperion sg721 - stars18a0pvw326fydfdat5tzyf4t8lhz0v6fyfaujpeg07fwqkygcxejsnp5fac 
+    1024 tokens
+fren  - stars1ltd0maxmte3xf4zshta9j5djrq9cl692ctsp9u5q0p9wss0f5lmsvd9ukk
+    5000 tokens
+sg punks - stars17s7emulfygjuk0xn906athk5e5efsdtumsat5n2nad7mtrg4xres3ysf3p
+    8888 tokens
