@@ -38,7 +38,8 @@ provider:
       basicAuth:
         functionName: basicAuth
         resultTtlInSeconds: 0
-        identitySource: method.request.header.Authorization
+        identitySource:
+          - $request.header.Authorization 
         type: request
     # https://www.serverless.com/framework/docs/providers/aws/events/http-api#jwt-authorizers
 

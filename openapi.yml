@@ -8,6 +8,7 @@ servers:
     description: Main (production)
   - url: http://staging-api.example.com
     description: Staging
+    
 paths:
   /contracts:
     get:
@@ -20,7 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Contract"
+                  $ref: "#/components/schemas/LimitedContract"
     parameters:
       - $ref: "#/components/parameters/Page"
       - $ref: "#/components/parameters/Limit"
@@ -37,13 +38,15 @@ paths:
                 $ref: "#/components/schemas/Contract"
     post:
       summary: Adds a new contract to process. Fails on duplicate contract
+      security:
+        - basicAuth: []
       responses:
         "201": # status code
           description: A contract object
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Contract"
+                $ref: "#/components/schemas/LimitedContract"
     parameters:
       - $ref: "#/components/parameters/ContractId"
 
@@ -79,11 +82,25 @@ paths:
         - $ref: "#/components/parameters/ContractId"
 
 components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
+    LimitedContract:
+      type: object
+      properties:
+        contract:
+          $ref: "#/components/schemas/ContractId"
+        createdAt:
+          type: string
+          format: "date-time"        
+        count:
+          type: integer
     Contract:
       type: object
       properties:
-        contractId:
+        contract:
           $ref: "#/components/schemas/ContractId"
         createdAt:
           type: string
@@ -91,8 +108,8 @@ components:
         traits:
           type: array
           items:
-            type: string
-        numItems:
+            $ref: "#/components/schemas/Trait"
+        count:
           type: integer
     ContractId:
       type: string
@@ -111,16 +128,12 @@ components:
     Trait:
       type: object
       properties:
-        name:
+        traitType:
           type: string
         value:
           type: string
-        numItemsWith:
-          type: integer
-        # percentItemsWith:
-        #   $ref: "#/components/schemas/Percent"
-        score:
-          $ref: "#/components/schemas/Score"
+        count:
+          type: integer        
     Traits:
       type: array
       items:
@@ -133,7 +146,7 @@ components:
         rank:
           $ref: "#/components/schemas/Rank"
         score:
-          $ref: "#/components/schemas/Score"
+          $ref: "#/components/schemas/Score"        
     Rarity:
       type: object
       properties:
@@ -145,6 +158,8 @@ components:
           $ref: "#/components/schemas/Score"
         traits:
           $ref: "#/components/schemas/Traits"
+        total:
+          type: integer
 
   parameters:
     Page:

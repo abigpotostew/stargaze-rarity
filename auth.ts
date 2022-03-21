@@ -1,5 +1,5 @@
 exports.handler = (evt, ctx, callback) => {
-    const authorizationHeader = evt.headers.Authorization;
+    const authorizationHeader = evt.headers.Authorization || evt.headers.authorization;
   
     if (!authorizationHeader) {
       return callback("Unauthorized");
@@ -10,8 +10,7 @@ exports.handler = (evt, ctx, callback) => {
       .toString()
       .split(":");
   
-    const allowedUsers = process.env.AUTH_USERS ? JSON.parse(process.env.AUTH_USERS) : {};
-    console.log("authing")    
+    const allowedUsers = process.env.AUTH_USERS ? JSON.parse(process.env.AUTH_USERS) : {};    
     if(allowedUsers[username] !== password){
         return callback("Unauthorized");
     }    
@@ -20,7 +19,7 @@ exports.handler = (evt, ctx, callback) => {
   };
   
   function buildAllowAllPolicy(evt, principalId) {
-    const tmp = evt.methodArn.split(":");
+    const tmp = (evt.methodArn ? evt.methodArn : evt.routeArn).split(":");
     const apiGatewayArnTmp = tmp[5].split("/");
     const awsAccountId = tmp[4];
     const awsRegion = tmp[3];
