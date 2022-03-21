@@ -44,16 +44,8 @@ export const handler: Handler = async (event: any) => {
         return response
       }
 
-      case `POST /private/{privateKey}/contracts/{contractId}`: {
-        const { pathParameters: { contractId, privateKey } } = event
-        if(privateKey!==defaultConfig().secretToken){
-          return {
-            statusCode: 404,
-            body: JSON.stringify({
-              message: "Not Found"
-            })
-          }
-        }
+      case `POST /contracts/{contractId}`: {        
+        const { pathParameters: { contractId } } = event               
         const response: ApiResponse = await handleCreateContract(contractId)
         if (isOk(response)) {
           await publishSnsTopic(createContractMessage( contractId ))

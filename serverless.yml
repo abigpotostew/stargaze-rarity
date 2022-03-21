@@ -5,17 +5,19 @@
 service: stargaze-rarity
 frameworkVersion: '3'
 custom:
-    metadataTopic: ${self:service}-${opt:stage, 'dev'}-metadata-topic #This is the global name of the topic
-    scripts:
-      hooks:
-        'after:package:createDeploymentArtifacts': >
-          printf "[after:package:createDeploymentArtifacts hook] Removing development dependencies " &&
-          (cd .serverless && unzip -qq stargaze-rarity.zip -d stargaze-rarity)          && printf "." &&
-          (cd .serverless && rm -rf stargaze-rarity/node_modules)                       && printf "." &&
-          (cd .serverless/stargaze-rarity && npm install --only=prod > /dev/null 2>&1)  && printf "." &&
-          (cd .serverless/stargaze-rarity/ && zip -q -FSr ../stargaze-rarity.zip .)     && printf ".\n" &&
-          rm -rf .serverless/stargaze-rarity/ &&
-          printf "[after:package:createDeploymentArtifacts hook] Done\n"
+  serverless-offline:
+    ignoreJWTSignature: true
+  metadataTopic: ${self:service}-${opt:stage, 'dev'}-metadata-topic #This is the global name of the topic
+  scripts:
+    hooks:
+      'after:package:createDeploymentArtifacts': >
+        printf "[after:package:createDeploymentArtifacts hook] Removing development dependencies " &&
+        (cd .serverless && unzip -qq stargaze-rarity.zip -d stargaze-rarity)          && printf "." &&
+        (cd .serverless && rm -rf stargaze-rarity/node_modules)                       && printf "." &&
+        (cd .serverless/stargaze-rarity && npm install --only=prod > /dev/null 2>&1)  && printf "." &&
+        (cd .serverless/stargaze-rarity/ && zip -q -FSr ../stargaze-rarity.zip .)     && printf ".\n" &&
+        rm -rf .serverless/stargaze-rarity/ &&
+        printf "[after:package:createDeploymentArtifacts hook] Done\n"
 
 provider:
   name: aws
@@ -32,6 +34,12 @@ provider:
             - Ref: MetadataTopic
   httpApi:
     cors: true
+    authorizers:
+      basicAuth:
+        functionName: basicAuth
+        resultTtlInSeconds: 0
+        identitySource: method.request.header.Authorization
+        type: request
     # https://www.serverless.com/framework/docs/providers/aws/events/http-api#jwt-authorizers
 
 #  vpc: 
@@ -46,6 +54,8 @@ provider:
 #      - subnet-66bc2e6a         
 
 functions:
+  basicAuth:
+    handler: auth.handler
   api:
     timeout: 20
     handler: api.handler
@@ -54,8 +64,11 @@ functions:
           path: /contracts
           method: get
       - httpApi:
-          path: /private/{privateKey}/contracts/{contractId}
+          path: /contracts/{contractId}
           method: post
+          authorizer:
+            name: basicAuth
+            type: request
       - httpApi:
           path: /contracts/{contractId}
           method: get
