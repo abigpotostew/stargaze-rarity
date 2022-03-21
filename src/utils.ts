@@ -1,5 +1,4 @@
 import {
-    encodeSecp256k1Pubkey,
     Secp256k1HdWallet,
     Bip39,
     Random,
@@ -13,3 +12,5 @@ export const randomContract = async () => {
     const [{ address, pubkey }] = await wallet.getAccounts();
     return address;
 }
+
+export const contractRegex = /^stars[a-zA-HJ-NP-Z0-9]{59}$/;

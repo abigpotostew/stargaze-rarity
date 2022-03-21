@@ -1,10 +1,11 @@
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { SG721Trait } from "./sg721Trait.entity";
 import { Token } from "./token.entity";
 import { SG721Meta } from "./sg721Meta.entity";
 
 
 @Entity('sg721s')
+@Unique('sg721s_unique_contract',['contract'])
 export class SG721 {
 
   @PrimaryGeneratedColumn()

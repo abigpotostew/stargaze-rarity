@@ -5,6 +5,7 @@ import { ApiResponse, isOk } from "./src/api/apiResponse";
 import { handleCreateContract, handleReadContract, handleListContracts, handleReadToken, handleListTokens } from "./src/api/controller";
 import { Services } from "./src/services";
 import { createContractMessage } from "./src/message";
+import { defaultConfig } from "./src/config";
 
 dotenv.config();
 
@@ -43,8 +44,16 @@ export const handler: Handler = async (event: any) => {
         return response
       }
 
-      case 'POST /contracts/{contractId}': {
-        const { pathParameters: { contractId } } = event
+      case `POST /private/{privateKey}/contracts/{contractId}`: {
+        const { pathParameters: { contractId, privateKey } } = event
+        if(privateKey!==defaultConfig().secretToken){
+          return {
+            statusCode: 404,
+            body: JSON.stringify({
+              message: "Not Found"
+            })
+          }
+        }
         const response: ApiResponse = await handleCreateContract(contractId)
         if (isOk(response)) {
           await publishSnsTopic(createContractMessage( contractId ))

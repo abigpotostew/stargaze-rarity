@@ -1,7 +1,7 @@
 import { QueryContract } from "../cosmwasm/sg721";
 import { defaultConfig } from "../config";
-import asyncPool = require("tiny-async-pool");
 import { fetchMetadata } from "./fetch";
+import asyncPool = require("tiny-async-pool");
 
 type TraitValue = string | number | boolean | null;
 
@@ -14,11 +14,20 @@ const getCid = (baseUri: string) => {
   return baseUri.replace('ipfs://', '')
 }
 
-export const downloadMetadata = async (sg721Contract: string) => {
-  // get contract info
+export const getContractMetadata = async (sg721Contract: string) => {
   const config = defaultConfig();
   const queryContract = await QueryContract.init(config)
   const contractInfo = await queryContract.contractInfo(sg721Contract)
+  if (!contractInfo) {
+    throw new Error(`Contract ${sg721Contract} not found`)
+  }
+  return contractInfo
+}
+
+export const downloadMetadata = async (sg721Contract: string) => {
+  // get contract info
+  const config = defaultConfig();
+  const contractInfo = await getContractMetadata(sg721Contract)
 
   //assume it's sequential, without gaps in token ids
 
@@ -26,7 +35,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
 
   const allTraits: { [key: string]: Map<TraitValue, number> } = {};
   const tokenTraits = new Map<string, Trait[]>();
-  const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl,config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
+  const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl, config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
   await asyncPool(config.concurrentIPFSDownloads, [...Array(contractInfo.totalSupply).keys()], async (i: number) => {
     i = i + 1;
     let metadata = await fetchMetadata(gateways, cid, i.toString())

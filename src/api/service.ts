@@ -1,14 +1,19 @@
 import { SG721 } from "../database/entities/sg721.entity";
 import { Token } from "../database/entities/token.entity";
 import { getServicesSingleton, Services } from "../services";
+import { contractRegex } from "../utils";
 
 let services: Services | null = null
 const pageLimit: number = 30
 
-const createContract = async (contractId: string): Promise<SG721> => {
+const createContract = async (contractId: string): Promise<SG721|null> => {
     // Probably want to add some validation for contractId
     if (!services) {
         services = await getServicesSingleton()
+    }
+    
+    if(!contractRegex.test(contractId)){
+        return null;
     }
 
     const existing =await services.repo.getContract(contractId) 

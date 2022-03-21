@@ -1,11 +1,10 @@
-
 import "reflect-metadata"
 import { ClassConstructor, instanceToPlain, plainToClass } from "class-transformer";
 import { ApiResponse } from "./apiResponse";
 import { SG721Model } from "./models/sg721.model";
 import { SG721SimpleModel } from "./models/sg721Simple.model";
 import { TokenModel } from "./models/token.model";
-import { createContract, readContract, listContracts, readToken, listTokens } from "./service";
+import { createContract, listContracts, listTokens, readContract, readToken } from "./service";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -16,8 +15,19 @@ const convertModel = function <T, V>(klass: ClassConstructor<T>, obj: V): T | nu
     return null
 }
 
+const addCorsHeaders = (response: ApiResponse) => {
+    const out: ApiResponse = { ...response }
+    out.headers = {
+        ...response.headers,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+    }
+
+    return out
+}
+
 const handleReturn = async (statusCode: number, callback: () => any): Promise<ApiResponse> => {
-    let payload
+    let payload:ApiResponse;
     try {
         const result = await callback();
         if (result === null || result === undefined) {
@@ -42,14 +52,18 @@ const handleReturn = async (statusCode: number, callback: () => any): Promise<Ap
         }
     }
     payload.headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
-    return payload
+    
+    return addCorsHeaders(payload)
 }
 
 const handleCreateContract = async (contractId): Promise<ApiResponse> => {
     return handleReturn(201, async () => {
         const contract = await createContract(contractId)
+        if (!contract) {
+            return null;
+        }
         return convertModel(SG721SimpleModel, contract)
     })
 }
