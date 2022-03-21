@@ -7,9 +7,10 @@ import { TokenMeta } from "./database/entities/tokenMeta.entity";
 import { TokenTrait } from "./database/entities/tokenTrait.entity";
 import { SG721Meta } from "./database/entities/sg721Meta.entity";
 import { saveChunked } from "./database/insert-chunk";
+import { defaultConfig } from "./config";
 
-const cacheOpts={
-  cache:60000,
+const cacheOpts = {
+  cache: defaultConfig().cacheDurationMs,
 }
 
 export class Repository {
@@ -18,8 +19,7 @@ export class Repository {
   constructor(db: DataSource) {
     this.db = db;
   }
-
-
+  
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
     return await this.db.manager.getRepository(Token).findOne({
       where: [{

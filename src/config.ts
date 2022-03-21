@@ -6,6 +6,7 @@ export class Config {
   public readonly cloudflareGatewayBaseUrl = process.env.IPFS_GATEWAY_BASE_URL || 'https://cloudflare-ipfs.com/ipfs';
   public readonly concurrentIPFSDownloads = parseInt(process.env.CONCURRENT_IPFS_DOWNLOADS||'25')
   public readonly secretToken = process.env.SECRET_TOKEN || 'secretToken';
+  public readonly cacheDurationMs = parseInt(process.env.CACHE_DURATION_MS||'60000')
 }
 
 let config: Config|null=null;
