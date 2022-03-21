@@ -6,7 +6,7 @@ dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
 const isOffline = process.env.SLS_OFFLINE || false
-console.log("Environment", env)
+// console.log("Environment", env)
 const dataSource = new DataSource({
     type: 'postgres',
     host: process.env.POSTGRESQL_HOST,
