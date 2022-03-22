@@ -82,3 +82,10 @@ sg punks - stars17s7emulfygjuk0xn906athk5e5efsdtumsat5n2nad7mtrg4xres3ysf3p
     8888 tokens
 endala:
     stars12njsx22ne73swjqxxn5e7xtc2n95y2aw8r73cqdth0g86way24cq98v5q7
+
+problems with:
+
+baby atoms
+https://app.stargaze.zone/media/stars1m4ns69zvkk2zv0946mw298tlky5ckvu08rtxggtg29p784kc5sxqwgx4h0/1
+troopers
+https://app.stargaze.zone/media/stars14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6sv9y4pd/1
