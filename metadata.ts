@@ -34,6 +34,7 @@ export const handler: Handler = async (event: any, context: Context) => {
         metadata.tokenTraits,
         metadata.scores,
         metadata.rankings,
+        metadata.mintedTokens
         )
     return {
         statusCode:200,

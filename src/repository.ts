@@ -74,13 +74,14 @@ export class Repository {
     tokenTraits: Map<string, ExtTrait[]>,
     scores: Map<string, number>,
     rankings: Map<string, number>,
+    mintedTokens: string[]
   ) {
     try {
       const contractRepo = this.db.manager.getRepository(SG721)
       const c = await contractRepo.findOne({ where: { contract } })
       if (c) {
         const traits = await this.addContractTraits(c, allTraits)
-        const tokens = await this.addTokens(c, tokenTraits, scores, rankings)
+        const tokens = await this.addTokens(c, tokenTraits, scores, rankings, mintedTokens)
         return {
           traits,
           tokens
@@ -96,7 +97,8 @@ export class Repository {
     contract: SG721,
     tokenTraits: Map<string, ExtTrait[]>,
     scores: Map<string, number>,
-    rankings: Map<string, number>
+    rankings: Map<string, number>,
+    mintedTokens: string[]
   ): Promise<Token[]> {
     const tokensRepo = this.db.manager.getRepository(Token)
     const tokenMetaRepo = this.db.manager.getRepository(TokenMeta)
@@ -110,6 +112,8 @@ export class Repository {
     const sg721Meta = sg721MetaRepo.create()
     sg721Meta.contract = contract
     sg721Meta.count = scores.size
+    sg721Meta.minted = mintedTokens.length
+    
     await saveChunked(sg721MetaRepo, SG721Meta, [sg721Meta], '"sg721_meta_unique_contract"', false,
       `count = EXCLUDED.count
       WHERE (sg721_meta.count) is distinct from (EXCLUDED.count)`)
