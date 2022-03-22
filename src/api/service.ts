@@ -12,9 +12,19 @@ const createContract = async (contractId: string): Promise<SG721|null> => {
         services = await getServicesSingleton()
     }
     
-    if(!contractRegex.test(contractId) || !(await services.query.isSg721(contractId))){
+    if(!contractRegex.test(contractId) ){
         console.log(`contract address '${contractId}' is not a sg721 address`)
         return null;
+    }
+    const isSg721 = await services.query.isSg721(contractId)
+    if(!isSg721){
+        const isMinter = await services.query.isMinter(contractId)
+        if(!isMinter){
+            console.log(`contract address '${contractId}' is not a sg721 or minter address`)
+            return null;
+        }else{
+            contractId = await services.query.getSg721Address(contractId)
+        }
     }
 
     const existing =await services.repo.getContract(contractId) 

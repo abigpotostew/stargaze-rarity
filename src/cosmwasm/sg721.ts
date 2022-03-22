@@ -41,6 +41,18 @@ export class QueryContract {
       return false;
     }
   }
+  
+  public async isMinter(address:string){
+    try{
+      return !!(await this.getSg721Address(address))
+    }catch (e) {
+      return false;
+    }
+  }
+
+  public async getSg721Address(address:string){
+     return (await this.client.queryContractSmart(address, { config: {}})).sg721_address as string;
+  }
 
   private async getMinterAddress(address:string){
      return (await this.client.queryContractSmart(address, { minter: {}})).minter as string;
