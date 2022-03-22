@@ -113,7 +113,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     allTraits,
     tokenTraits,
     scores,
-    numTokens: contractInfo.totalSupply,
+    numTokens: contractInfo.maxTokens,
     tokenIds: Array.from(tokenTraits.keys()),
     rankings,
     mintedTokens
