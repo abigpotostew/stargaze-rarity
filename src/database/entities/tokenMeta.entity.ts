@@ -16,7 +16,7 @@ export class TokenMeta {
     @JoinColumn({ name: 'contract_id' })
     contract: SG721;
 
-    @OneToOne(() => Token, token => token.meta)
+    @ManyToOne(() => Token, token => token.meta)
     @JoinColumn({ name: 'token_id' })
     token: Token;
 

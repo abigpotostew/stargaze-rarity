@@ -1,4 +1,4 @@
-import { Exclude } from "class-transformer";
+import { Exclude, Transform } from "class-transformer";
 import { SG721Model } from "./sg721.model";
 
 export class SG721TraitModel {
@@ -21,8 +21,8 @@ export class SG721TraitModel {
   //     name: 'display_type'
   //   })
   //   displayType: string; 
-  
 
+  @Transform(({value}) => value.v, {toClassOnly: true})
   value: any;
 
   count: number

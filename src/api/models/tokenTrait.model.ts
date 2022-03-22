@@ -19,6 +19,7 @@ export class TokenTraitModel {
 
     traitType: string;
 
+    @Transform(({value}) => value.v, {toClassOnly: true})
     value: any;
 
     @Exclude()

@@ -37,7 +37,7 @@ export class SG721Trait {
     array: false,
     nullable: true
   })
-  value: TraitValue;
+  value: { v: TraitValue };
 
   @Column({
     type: "integer"

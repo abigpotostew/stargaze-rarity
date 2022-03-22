@@ -5,6 +5,7 @@ export const createRetryClient = (opts: {
   retries: number;
   noResponseRetries: number;
   statusToRetry?: number[][];
+  retryDelay?: number;
 }): AxiosInstance => {
   const axiosClient = axios.create();
   axiosClient.defaults.raxConfig = {
@@ -23,25 +24,27 @@ export const createRetryClient = (opts: {
     statusCodesToRetry: [
       [100, 199],
       [429, 429],
-      [408, 408],
+      [404, 408],
       [500, 524, 599],
     ],
-
+    
+    retryDelay: opts.retryDelay || 100,
+    
     // You can set the backoff type.
     // options are 'exponential' (default), 'static' or 'linear'
-    backoffType: 'exponential',
+    backoffType: 'static',
 
     // You can detect when a retry is happening, and figure out how many
     // retry attempts have been made
-    onRetryAttempt: (err) => {
-      const cfg = rax.getConfig(err);
-      const url = err?.request?._currentUrl||`${err?.request?.protocol}//${err?.request?.host}${err?.request?.path}`;
-
-      cfg &&
-      console.log(
-        `Retry attempt #${cfg.currentRetryAttempt} for url '${url}' status code '${err?.response?.status || 'CONNTIMEOUT'}'`,
-      );
-    },
+    // onRetryAttempt: (err) => {
+    //   const cfg = rax.getConfig(err);
+    //   const url = err?.request?._currentUrl||`${err?.request?.protocol}//${err?.request?.host}${err?.request?.path}`;
+    //
+    //   cfg &&
+    //   console.log(
+    //     `Retry attempt #${cfg.currentRetryAttempt} for url '${url}' status code '${err?.response?.status || 'CONNTIMEOUT'}'`,
+    //   );
+    // },
   };
   if (opts.statusToRetry)
     axiosClient.defaults.raxConfig.statusCodesToRetry?.push(...opts.statusToRetry);

@@ -33,10 +33,21 @@ export class QueryContract {
     const client = await CosmWasmClient.connect(config.rpcEndpoint);
     return new QueryContract(client);
   }
+  
+  public async isSg721(address:string){
+    try{
+      return !!(await this.getMinterAddress(address))
+    }catch (e) {
+      return false;
+    }
+  }
 
+  private async getMinterAddress(address:string){
+     return (await this.client.queryContractSmart(address, { minter: {}})).minter as string;
+  }
+  
   async contractInfo(sg721Address:string) : Promise<ContractInfo|null> {
-    const minter = await this.client.queryContractSmart(sg721Address, { minter: {}})
-    const minterAddress = minter.minter as string
+    const minterAddress = await this.getMinterAddress(sg721Address) 
     if(!minterAddress){
       console.log("no minter address")
       return null

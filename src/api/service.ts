@@ -12,7 +12,8 @@ const createContract = async (contractId: string): Promise<SG721|null> => {
         services = await getServicesSingleton()
     }
     
-    if(!contractRegex.test(contractId)){
+    if(!contractRegex.test(contractId) || !(await services.query.isSg721(contractId))){
+        console.log(`contract address '${contractId}' is not a sg721 address`)
         return null;
     }
 

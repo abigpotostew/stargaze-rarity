@@ -38,18 +38,22 @@ export const downloadMetadata = async (sg721Contract: string) => {
   const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl, config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
   await asyncPool(config.concurrentIPFSDownloads, [...Array(contractInfo.totalSupply).keys()], async (i: number) => {
     i = i + 1;
-    let metadata = await fetchMetadata(gateways, cid, i.toString())
-    if (!metadata) {
+    let result = await fetchMetadata(gateways, cid, i.toString())
+    if (!result) {
       throw new Error(`Failed to fetch token metadata ${i}`)
     }
+    if(result.isNotFound){
+      //skip it!
+      console.log(`skipping token ${i} because it is not found in ipfs`)
+      return;
+    }
+    const metadata = result.data;
     let traits: Trait[] = [];
     const attributes = metadata.traits || metadata.attributes;
     if (Array.isArray(attributes)) {
       traits = attributes as Trait[]
     }
-
-    // save to db here?
-
+    
     // count trait frequency
     for (let trait of traits) {
       if (!allTraits[trait.trait_type]) {

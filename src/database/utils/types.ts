@@ -1,4 +1,4 @@
-type TraitValue = string | number | boolean | null;
+type TraitValue = any[] | string | number | boolean | null;
 
 interface ExtTrait {
     trait_type: string;

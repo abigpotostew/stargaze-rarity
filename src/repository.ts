@@ -75,15 +75,20 @@ export class Repository {
     scores: Map<string, number>,
     rankings: Map<string, number>,
   ) {
-    const contractRepo = this.db.manager.getRepository(SG721)
-    const c = await contractRepo.findOne({ where: { contract } })
-    if (c) {
-      const traits = await this.addContractTraits(c, allTraits)
-      const tokens = await this.addTokens(c, tokenTraits, scores, rankings)
-      return {
-        traits,
-        tokens
+    try {
+      const contractRepo = this.db.manager.getRepository(SG721)
+      const c = await contractRepo.findOne({ where: { contract } })
+      if (c) {
+        const traits = await this.addContractTraits(c, allTraits)
+        const tokens = await this.addTokens(c, tokenTraits, scores, rankings)
+        return {
+          traits,
+          tokens
+        }
       }
+    }catch (e) {
+      console.log('cannot save to db', e)
+      throw e
     }
   }
 
@@ -121,7 +126,7 @@ export class Repository {
       const traits = extTraits.map((t) => {
         const tokenTrait = tokenTraitsRepo.create()
         tokenTrait.traitType = t.trait_type
-        tokenTrait.value = t.value
+        tokenTrait.value = {v: t.value}
         tokenTrait.token = token
         tokenTrait.contract = contract
         return tokenTrait
@@ -143,7 +148,13 @@ export class Repository {
     let i: number, j: number;
     const chunkSize = 250;
     for (i = 0, j = tokens.length; i < j; i += chunkSize) {
-      const chunk = tokens.slice(i, i + chunkSize);
+      let chunk = tokens.slice(i, i + chunkSize);
+
+      chunk = Array.from(chunk.reduce((map,curr)=>{
+        const key =curr.tokenId
+        map.set(key, curr)
+        return map;
+      }, new Map<string,Token>()).values())
       await saveChunked(tokensRepo, Token, chunk, '"token_unique_id_contract"', true, undefined, chunkSize)
       const tokenWithId = await tokensRepo.find({where: {tokenId: In(chunk.map(t => t.tokenId))}})
       const idMap = tokenWithId.reduce((acc, t) => {
@@ -153,7 +164,13 @@ export class Repository {
       for (let token of tokens) {
         token.id = idMap[token.tokenId]
       }
-      await saveChunked(tokenMetaRepo, TokenMeta, chunk.map(t => t.meta), '"token_meta_unique_token_contract"', false,
+      
+      let metas = Array.from(chunk.map((t)=>t.meta).reduce((map,curr)=>{
+        const key =curr.token.tokenId
+        map.set(key, curr)
+        return map;
+      }, new Map<string,TokenMeta>()).values())
+      await saveChunked(tokenMetaRepo, TokenMeta, metas, '"token_meta_unique_token_contract"', false,
         `
         rank = EXCLUDED.rank, 
         score = EXCLUDED.score 
@@ -164,7 +181,13 @@ export class Repository {
         EXCLUDED.rank,
         EXCLUDED.score)`,
         chunkSize)
-      await saveChunked(tokenTraitsRepo, TokenTrait, chunk.map(t => t.traits).flat(), '"token_traits_contract_token_trait_type_unique"', false,
+
+      let traits = Array.from(chunk.map(t => t.traits).flat().reduce((map,curr)=>{
+        const key = curr.token.tokenId + curr.traitType
+        map.set(key, curr)
+        return map;
+      }, new Map<string,TokenTrait>()).values())
+      await saveChunked(tokenTraitsRepo, TokenTrait, traits, '"token_traits_contract_token_trait_type_unique"', false,
         `
         value = EXCLUDED.value 
         WHERE (
@@ -173,7 +196,6 @@ export class Repository {
         is distinct from (
         EXCLUDED.value)`,
         chunkSize)
-      
     }
 
     // await tokensRepo.save(tokens, { chunk: 250 })
@@ -203,17 +225,23 @@ export class Repository {
       for (let [traitValue, count] of allTraits[traitType]) {
         const trait = traitsRepo.create()
         trait.traitType = traitType
-        trait.value = traitValue
+        trait.value = { v: traitValue }
         trait.count = count
         trait.contract = contract
         traits.push(trait)
       }
     }
+    const uniqueTraits = traits.reduce((map,curr)=>{
+      const key =curr.traitType+JSON.stringify(curr.value);
+      map.set(key, curr)
+      return map;
+    }, new Map<string,SG721Trait>())
 
-    await saveChunked(traitsRepo, SG721Trait, traits, '"sg721_traits_unique"', false, `
+    const uniq=Array.from(uniqueTraits.values());
+    await saveChunked(traitsRepo, SG721Trait, uniq, '"sg721_traits_unique"', false, `
     count = EXCLUDED.count
       WHERE (sg721_traits.count) is distinct from (EXCLUDED.count)`, 500)
     // await traitsRepo.insert(traits);
-    return traits;
+    return uniq;
   }
 }

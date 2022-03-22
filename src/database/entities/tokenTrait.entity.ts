@@ -37,7 +37,7 @@ export class TokenTrait {
         array: false,
         nullable: true
     })
-    value: TraitValue;
+    value: { v: TraitValue };
 
     // Might want to support this in the future
     //   @Column({
