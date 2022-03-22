@@ -22,7 +22,8 @@ export class SG721Meta {
 
 
     @Column({
-        type: 'numeric'
+        type: 'numeric',
+        default: 0
     })
     minted: number;
 }
