@@ -5,6 +5,8 @@ import { SG721Model } from "./models/sg721.model";
 import { SG721SimpleModel } from "./models/sg721Simple.model";
 import { TokenModel } from "./models/token.model";
 import { createContract, listContracts, listTokens, readContract, readToken } from "./service";
+import { createContractMessage } from "../message";
+import { publishSnsTopic } from "../../api";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -64,6 +66,10 @@ const handleCreateContract = async (contractId): Promise<ApiResponse> => {
         if (!contract) {
             return null;
         }
+        
+        await publishSnsTopic(createContractMessage( contract.contract ))
+        console.log("Published sns message")
+        
         return convertModel(SG721SimpleModel, contract)
     })
 }

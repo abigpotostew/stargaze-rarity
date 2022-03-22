@@ -13,7 +13,7 @@ let services: Services | null = null
 const { AWS_REGION: region, IS_OFFLINE: isOffline, METADATA_TOPIC_ARN: snsTopic } = process.env
 const snsClient = new SNSClient({ region });
 
-const publishSnsTopic = async (data) => {
+export const publishSnsTopic = async (data) => {
   try {
     if (!isOffline && snsTopic) {
       const params: PublishCommandInput = {
@@ -47,9 +47,6 @@ export const handler: Handler = async (event: any) => {
       case `POST /contracts/{contractId}`: {        
         const { pathParameters: { contractId } } = event               
         const response: ApiResponse = await handleCreateContract(contractId)
-        if (isOk(response)) {
-          await publishSnsTopic(createContractMessage( contractId ))
-        }
         return response;
       }
 
