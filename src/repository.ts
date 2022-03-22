@@ -115,8 +115,9 @@ export class Repository {
     sg721Meta.minted = mintedTokens.length
     
     await saveChunked(sg721MetaRepo, SG721Meta, [sg721Meta], '"sg721_meta_unique_contract"', false,
-      `count = EXCLUDED.count
-      WHERE (sg721_meta.count) is distinct from (EXCLUDED.count)`)
+      `count = EXCLUDED.count,
+       minted = EXCLUDED.minted
+      WHERE (sg721_meta.count, sg721_meta.minted) is distinct from (EXCLUDED.count, EXCLUDED.minted)`)
 
     // await sg721MetaRepo.save(sg721Meta)
 

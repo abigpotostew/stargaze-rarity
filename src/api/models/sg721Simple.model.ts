@@ -17,6 +17,11 @@ export class SG721SimpleModel {
   @Transform(({obj}) => obj?.meta?.count, {toClassOnly: true})
   count: number;
 
+  @Expose()
+  @Type(() => Number)
+  @Transform(({obj}) => obj?.meta?.minted, {toClassOnly: true})
+  minted: number;
+
   @Exclude()
   traits: SG721TraitModel[];
 

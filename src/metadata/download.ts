@@ -65,7 +65,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     tokenTraits.set(i, traits)
   })
 
-  const numTokens = tokenTraits.size;
+  const numMintedTokens = mintedTokens.length;
   const allTraitNames = Object.keys(allTraits)
   // counts for empty traits
   for (let tokenId of tokenTraits.keys()) {
@@ -86,7 +86,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     for (let traitName of allTraitNames) {
       const trait = thisTokenTraits.find(t => t.trait_type === traitName)
       const traitvalue = trait?.value || null;
-      const s = 1 / (allTraits[traitName].get(traitvalue) / numTokens)
+      const s = 1 / (allTraits[traitName].get(traitvalue) / numMintedTokens)
       score += s;
     }
     scores.set(tokenId, score)
@@ -113,7 +113,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     allTraits,
     tokenTraits,
     scores,
-    numTokens,
+    numTokens: contractInfo.totalSupply,
     tokenIds: Array.from(tokenTraits.keys()),
     rankings,
     mintedTokens
