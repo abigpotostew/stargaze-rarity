@@ -38,7 +38,6 @@ export const downloadMetadata = async (sg721Contract: string) => {
   const tokenTraits = new Map<string, Trait[]>();
   const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl, config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
   await asyncPool(config.concurrentIPFSDownloads, mintedTokens, async (i: string) => {    
-    console.log(i)
     let result = await fetchMetadata(gateways, cid, i)
     if (!result) {
       throw new Error(`Failed to fetch token metadata ${i}`)
