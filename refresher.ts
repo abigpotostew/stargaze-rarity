@@ -4,6 +4,7 @@ import {  instanceToPlain, plainToClass } from "class-transformer";
 import { SG721Model } from './src/api/models/sg721.model';
 import parse from 'parse-duration'
 import {publishSnsTopic} from "./src/sns"
+import { createContractMessage } from './src/message';
 
 const refreshInterval = process.env.REFRESH_FREQUENCY
 
@@ -16,9 +17,8 @@ export const handler: Handler = async (event: any, context: Context) => {
     // let's just make sure we have a valid interval
     if (parse(refreshInterval) > 0) {
         const contracts = await services.repo.getContractsToRefresh(refreshInterval)
-        await services.repo.refreshContracts(contracts)
         contracts.forEach((c) => {
-            publishSnsTopic({contractId:c.id})
+            publishSnsTopic(createContractMessage(c.contract))
         })
         
         return await JSON.stringify(instanceToPlain(plainToClass(SG721Model, contracts)))

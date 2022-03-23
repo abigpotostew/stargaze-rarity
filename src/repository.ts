@@ -253,21 +253,24 @@ export class Repository {
   }
 
   async getContractsToRefresh(interval: string): Promise<SG721[]> {
-    const contracts = await this.db.manager.getRepository(SG721)
+    const contractQuery = await this.db.manager.getRepository(SG721)
       .createQueryBuilder("sg721")
+      .leftJoinAndSelect("sg721.meta", "meta")
       // Possibly dangerous, but I couldn't figure out the variable replacement
       .where(`coalesce(sg721.last_refreshed, now() - interval '${interval}') <= now() - interval '${interval}'`)
-      .getMany();
-    console.log(contracts)
+      .andWhere(`meta.minted < meta.count`)
+
+    console.log(await contractQuery.getSql())
+    const contracts = await contractQuery.getMany()
     return contracts
   }
 
-  async refreshContracts(contracts: SG721[]): Promise<UpdateResult> {
+  async setRefreshTimestamp(contract:string): Promise<UpdateResult> {
     return await this.db.manager.getRepository(SG721)
       .createQueryBuilder()
       .update(SG721)
       .set({ lastRefreshed: new Date() })
-      .whereInIds(contracts.map((c) => c.id))
+      .where({contract})
       .execute();
   }
 }
