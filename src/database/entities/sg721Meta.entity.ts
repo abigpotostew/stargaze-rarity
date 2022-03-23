@@ -19,4 +19,11 @@ export class SG721Meta {
         type: 'numeric'
     })
     count: number;
+
+
+    @Column({
+        type: 'numeric',
+        default: 0
+    })
+    minted: number;
 }

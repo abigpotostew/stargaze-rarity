@@ -2,6 +2,8 @@ import { Config } from "../config";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 
+const paginationLimit = 30;
+
 export interface ContractInfo {
   minterAddress: string,
   minterConfig: MinterConfigRes,
@@ -56,6 +58,31 @@ export class QueryContract {
 
   private async getMinterAddress(address:string){
      return (await this.client.queryContractSmart(address, { minter: {}})).minter as string;
+  }
+
+  public async getMintedTokens (address:string, startAfter:string){
+    const q:any = {
+      all_tokens: {
+        limit: paginationLimit,
+      },
+    };
+    if (startAfter) {
+      q.all_tokens.start_after = startAfter;
+    }
+    // console.log("getAllMintedTokens", q);
+    return (await this.client.queryContractSmart(address, q)).tokens;
+  };
+
+  public async getAllMintedTokens(address:string){
+    const tokens:any[] = []
+    let startAfter:string = null
+
+    do {
+      const r = await this.getMintedTokens(address, startAfter)      
+      tokens.push(...r)
+      startAfter = (r.length >= paginationLimit) ? r[r.length - 1] : null
+    } while(startAfter)
+    return tokens;
   }
   
   async contractInfo(sg721Address:string) : Promise<ContractInfo|null> {

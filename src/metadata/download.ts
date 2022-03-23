@@ -17,18 +17,19 @@ const getCid = (baseUri: string) => {
 export const getContractMetadata = async (sg721Contract: string) => {
   const config = defaultConfig();
   const queryContract = await QueryContract.init(config)
-  const contractInfo = await queryContract.contractInfo(sg721Contract)
+  const contractInfo = await queryContract.contractInfo(sg721Contract)  
+  const mintedTokens = await queryContract.getAllMintedTokens(sg721Contract)
   if (!contractInfo) {
     throw new Error(`Contract ${sg721Contract} not found`)
   }
-  return contractInfo
+  return {contractInfo, mintedTokens}
 }
 
 export const downloadMetadata = async (sg721Contract: string) => {
   // get contract info
   const config = defaultConfig();
-  const contractInfo = await getContractMetadata(sg721Contract)
-
+  const {contractInfo, mintedTokens} = await getContractMetadata(sg721Contract)  
+  
   //assume it's sequential, without gaps in token ids
 
   const cid = getCid(contractInfo.baseUri)
@@ -36,9 +37,8 @@ export const downloadMetadata = async (sg721Contract: string) => {
   const allTraits: { [key: string]: Map<TraitValue, number> } = {};
   const tokenTraits = new Map<string, Trait[]>();
   const gateways = [config.pinataGatewayBaseUrl, config.ipfsGatewayBaseUrl, config.ipfsIoBaseUrl, config.cloudflareGatewayBaseUrl]
-  await asyncPool(config.concurrentIPFSDownloads, [...Array(contractInfo.totalSupply).keys()], async (i: number) => {
-    i = i + 1;
-    let result = await fetchMetadata(gateways, cid, i.toString())
+  await asyncPool(config.concurrentIPFSDownloads, mintedTokens, async (i: string) => {    
+    let result = await fetchMetadata(gateways, cid, i)
     if (!result) {
       throw new Error(`Failed to fetch token metadata ${i}`)
     }
@@ -62,10 +62,10 @@ export const downloadMetadata = async (sg721Contract: string) => {
       const current = allTraits[trait.trait_type].get(trait.value) || 0;
       allTraits[trait.trait_type].set(trait.value, current + 1)
     }
-    tokenTraits.set(i.toString(), traits)
+    tokenTraits.set(i, traits)
   })
 
-  const numTokens = tokenTraits.size;
+  const numMintedTokens = mintedTokens.length;
   const allTraitNames = Object.keys(allTraits)
   // counts for empty traits
   for (let tokenId of tokenTraits.keys()) {
@@ -86,7 +86,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     for (let traitName of allTraitNames) {
       const trait = thisTokenTraits.find(t => t.trait_type === traitName)
       const traitvalue = trait?.value || null;
-      const s = 1 / (allTraits[traitName].get(traitvalue) / numTokens)
+      const s = 1 / (allTraits[traitName].get(traitvalue) / numMintedTokens)
       score += s;
     }
     scores.set(tokenId, score)
@@ -113,8 +113,9 @@ export const downloadMetadata = async (sg721Contract: string) => {
     allTraits,
     tokenTraits,
     scores,
-    numTokens,
+    numTokens: contractInfo.maxTokens,
     tokenIds: Array.from(tokenTraits.keys()),
-    rankings
+    rankings,
+    mintedTokens
   }
 }
