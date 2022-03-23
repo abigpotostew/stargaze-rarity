@@ -18,6 +18,7 @@ custom:
         (cd .serverless/stargaze-rarity/ && zip -q -FSr ../stargaze-rarity.zip .)     && printf ".\n" &&
         rm -rf .serverless/stargaze-rarity/ &&
         printf "[after:package:createDeploymentArtifacts hook] Done\n"
+  refreshFrequency: 30 minutes
 
 provider:
   name: aws
@@ -41,22 +42,23 @@ provider:
         identitySource:
           - $request.header.Authorization 
         type: request
-    # https://www.serverless.com/framework/docs/providers/aws/events/http-api#jwt-authorizers
-
-#  vpc: 
-#    securityGroupIds: 
-#      - sg-60fddd05
-#    subnetIds:
-#      - subnet-31f0920b
-#      - subnet-8b32c0d2
-#      - subnet-b55585c2
-#      - subnet-c75510a2
-#      - subnet-139c8e3b
-#      - subnet-66bc2e6a         
+    # https://www.serverless.com/framework/docs/providers/aws/events/http-api#jwt-authorizers    
 
 functions:
   basicAuth:
     handler: auth.handler
+  refresher:
+    handler: refresher.handler
+    environment:
+      REFRESH_FREQUENCY: ${self:custom.refreshFrequency}
+    events:
+      - schedule: rate(${self:custom.refreshFrequency})
+      - httpApi:
+          path: /contracts/refresh
+          method: put
+          authorizer:
+            name: basicAuth
+            type: request
   api:
     timeout: 20
     handler: api.handler

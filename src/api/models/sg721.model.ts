@@ -12,6 +12,9 @@ export class SG721Model {
 
   createdAt: Date;
 
+  @Exclude()
+  lastRefreshed: Date;
+
   @Expose()
   @Type(() => Number)
   @Transform(({obj}) => obj?.meta?.count, {toClassOnly: true})

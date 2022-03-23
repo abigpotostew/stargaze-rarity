@@ -1,10 +1,7 @@
 import { Context, Handler } from 'aws-lambda';
-import { QueryContract } from "./src/cosmwasm/sg721";
-import { defaultConfig } from "./src/config";
-import { downloadMetadata } from "./src/metadata/download";
-import { Repository } from './src/repository';
-import { getServicesSingleton } from './src/services';
 import { ContractMessage } from "./src/message";
+import { downloadMetadata } from "./src/metadata/download";
+import { getServicesSingleton } from './src/services';
 
 const region = process.env.AWS_REGION
 

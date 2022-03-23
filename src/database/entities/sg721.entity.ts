@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { SG721Trait } from "./sg721Trait.entity";
 import { Token } from "./token.entity";
 import { SG721Meta } from "./sg721Meta.entity";
@@ -19,6 +19,13 @@ export class SG721 {
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
+
+  @Column({
+    type: "timestamp",
+    nullable: true,
+    name: 'last_refreshed' 
+  })
+  lastRefreshed: Date;
 
   @OneToMany(() => SG721Trait, trait => trait.contract)
   traits: SG721Trait[];
