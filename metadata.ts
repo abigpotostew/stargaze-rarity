@@ -39,6 +39,6 @@ export const handler: Handler = async (event: any, context: Context) => {
 
     return {
         statusCode: 200,
-        body: JSON.stringify({ traits: output.traits.length, tokens: output.tokens.length })
+        body: JSON.stringify({ traits: output?.traits?.length, tokens: output?.tokens?.length })
     }
 }

@@ -1,7 +1,10 @@
 import { createRetryClient } from "./axios";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 
-const client = createRetryClient({ retries: 5, noResponseRetries: 3 })
+const retries = 10;
+const httpClientTimeout = 2500
+const tokenRequestTimeout = 11000
+const client = createRetryClient({ retries, noResponseRetries: 0 })
 
 export interface MetadataResponse {
   isNotFound: boolean;
@@ -30,23 +33,26 @@ export const fetchMetadata = async (gateways: string[], cid: string, tokenId: st
 
 };
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+
 const get = async (gateway: string, cid: string, tokenId: string, options?: AxiosRequestConfig): Promise<MetadataResponse | null> => {
   const uri = cleanupUrl(`${gateway}/${cid}/${tokenId}`)
-  options.timeout = 5000
-  const response: any = await invokeGet(uri, options);//Promise.race([invokeGet(uri,options), sleep(15000)])
+  options.timeout = httpClientTimeout;
+  const response: any = await Promise.race([invokeGet(uri,options), sleep(tokenRequestTimeout)])
   if (!response) {
     console.log(`Timeout fetching ${uri}`)
     return null;
   }
   if (response.error) {
-    // console.log(`Failed to fetch ${uri}. Got status ${response.error.status}`)
+    console.log(`Failed to fetch ${uri}. Got status ${response.error.status}`)
     if (response.error?.response?.status === 404) {
       return { isNotFound: true, data: undefined }
     }
     return null;
   }
   if (response.res.status !== 200) {
-    // console.log(`Failed to fetch ${uri}. Got status ${response.res.status}`)
+    console.log(`Failed to fetch ${uri}. Got status ${response.res.status}`)
     return null;
   }
   return { isNotFound: false, data: await response.res.data }
