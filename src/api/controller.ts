@@ -1,12 +1,11 @@
+
 import "reflect-metadata"
 import { ClassConstructor, instanceToPlain, plainToClass } from "class-transformer";
 import { ApiResponse } from "./apiResponse";
 import { SG721Model } from "./models/sg721.model";
 import { SG721SimpleModel } from "./models/sg721Simple.model";
 import { TokenModel } from "./models/token.model";
-import { createContract, listContracts, listTokens, readContract, readToken } from "./service";
-import { createContractMessage } from "../message";
-import { publishSnsTopic } from "../../api";
+import { createContract, readContract, listContracts, readToken, listTokens } from "./service";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -17,19 +16,8 @@ const convertModel = function <T, V>(klass: ClassConstructor<T>, obj: V): T | nu
     return null
 }
 
-const addCorsHeaders = (response: ApiResponse) => {
-    const out: ApiResponse = { ...response }
-    out.headers = {
-        ...response.headers,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'true',
-    }
-
-    return out
-}
-
 const handleReturn = async (statusCode: number, callback: () => any): Promise<ApiResponse> => {
-    let payload:ApiResponse;
+    let payload
     try {
         const result = await callback();
         if (result === null || result === undefined) {
@@ -54,22 +42,14 @@ const handleReturn = async (statusCode: number, callback: () => any): Promise<Ap
         }
     }
     payload.headers = {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
     }
-    
-    return addCorsHeaders(payload)
+    return payload;
 }
 
 const handleCreateContract = async (contractId): Promise<ApiResponse> => {
     return handleReturn(201, async () => {
         const contract = await createContract(contractId)
-        if (!contract) {
-            return null;
-        }
-        
-        await publishSnsTopic(createContractMessage( contract.contract ))
-        console.log("Published sns message")
-        
         return convertModel(SG721SimpleModel, contract)
     })
 }

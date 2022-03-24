@@ -1,5 +1,5 @@
 import { SG721 } from "./database/entities/sg721.entity";
-import { DataSource, In } from "typeorm";
+import { DataSource, In, UpdateResult } from "typeorm";
 import { ExtTrait, TraitValue } from "./database/utils/types";
 import { SG721Trait } from "./database/entities/sg721Trait.entity";
 import { Token } from "./database/entities/token.entity";
@@ -19,7 +19,7 @@ export class Repository {
   constructor(db: DataSource) {
     this.db = db;
   }
-  
+
   async getToken(contractId: string, tokenId: string): Promise<Token | undefined> {
     return await this.db.manager.getRepository(Token).findOne({
       where: [{
@@ -75,7 +75,7 @@ export class Repository {
     scores: Map<string, number>,
     rankings: Map<string, number>,
     mintedTokens: string[],
-    numTokens:number
+    numTokens: number
   ) {
     try {
       const contractRepo = this.db.manager.getRepository(SG721)
@@ -88,7 +88,7 @@ export class Repository {
           tokens
         }
       }
-    }catch (e) {
+    } catch (e) {
       console.log('cannot save to db', e)
       throw e
     }
@@ -115,7 +115,7 @@ export class Repository {
     sg721Meta.contract = contract
     sg721Meta.count = numTokens
     sg721Meta.minted = mintedTokens.length
-    
+
     await saveChunked(sg721MetaRepo, SG721Meta, [sg721Meta], '"sg721_meta_unique_contract"', false,
       `count = EXCLUDED.count,
        minted = EXCLUDED.minted
@@ -133,7 +133,7 @@ export class Repository {
       const traits = extTraits.map((t) => {
         const tokenTrait = tokenTraitsRepo.create()
         tokenTrait.traitType = t.trait_type
-        tokenTrait.value = {v: t.value}
+        tokenTrait.value = { v: t.value }
         tokenTrait.token = token
         tokenTrait.contract = contract
         return tokenTrait
@@ -157,13 +157,13 @@ export class Repository {
     for (i = 0, j = tokens.length; i < j; i += chunkSize) {
       let chunk = tokens.slice(i, i + chunkSize);
 
-      chunk = Array.from(chunk.reduce((map,curr)=>{
-        const key =curr.tokenId
+      chunk = Array.from(chunk.reduce((map, curr) => {
+        const key = curr.tokenId
         map.set(key, curr)
         return map;
-      }, new Map<string,Token>()).values())
+      }, new Map<string, Token>()).values())
       await saveChunked(tokensRepo, Token, chunk, '"token_unique_id_contract"', true, undefined, chunkSize)
-      const tokenWithId = await tokensRepo.find({where: {tokenId: In(chunk.map(t => t.tokenId))}})
+      const tokenWithId = await tokensRepo.find({ where: { tokenId: In(chunk.map(t => t.tokenId)) } })
       const idMap = tokenWithId.reduce((acc, t) => {
         acc[t.tokenId] = t.id
         return acc
@@ -171,12 +171,12 @@ export class Repository {
       for (let token of tokens) {
         token.id = idMap[token.tokenId]
       }
-      
-      let metas = Array.from(chunk.map((t)=>t.meta).reduce((map,curr)=>{
-        const key =curr.token.tokenId
+
+      let metas = Array.from(chunk.map((t) => t.meta).reduce((map, curr) => {
+        const key = curr.token.tokenId
         map.set(key, curr)
         return map;
-      }, new Map<string,TokenMeta>()).values())
+      }, new Map<string, TokenMeta>()).values())
       await saveChunked(tokenMetaRepo, TokenMeta, metas, '"token_meta_unique_token_contract"', false,
         `
         rank = EXCLUDED.rank, 
@@ -189,11 +189,11 @@ export class Repository {
         EXCLUDED.score)`,
         chunkSize)
 
-      let traits = Array.from(chunk.map(t => t.traits).flat().reduce((map,curr)=>{
+      let traits = Array.from(chunk.map(t => t.traits).flat().reduce((map, curr) => {
         const key = curr.token.tokenId + curr.traitType
         map.set(key, curr)
         return map;
-      }, new Map<string,TokenTrait>()).values())
+      }, new Map<string, TokenTrait>()).values())
       await saveChunked(tokenTraitsRepo, TokenTrait, traits, '"token_traits_contract_token_trait_type_unique"', false,
         `
         value = EXCLUDED.value 
@@ -238,17 +238,39 @@ export class Repository {
         traits.push(trait)
       }
     }
-    const uniqueTraits = traits.reduce((map,curr)=>{
-      const key =curr.traitType+JSON.stringify(curr.value);
+    const uniqueTraits = traits.reduce((map, curr) => {
+      const key = curr.traitType + JSON.stringify(curr.value);
       map.set(key, curr)
       return map;
-    }, new Map<string,SG721Trait>())
+    }, new Map<string, SG721Trait>())
 
-    const uniq=Array.from(uniqueTraits.values());
+    const uniq = Array.from(uniqueTraits.values());
     await saveChunked(traitsRepo, SG721Trait, uniq, '"sg721_traits_unique"', false, `
     count = EXCLUDED.count
       WHERE (sg721_traits.count) is distinct from (EXCLUDED.count)`, 500)
     // await traitsRepo.insert(traits);
     return uniq;
+  }
+
+  async getContractsToRefresh(interval: string): Promise<SG721[]> {
+    const contractQuery = await this.db.manager.getRepository(SG721)
+      .createQueryBuilder("sg721")
+      .leftJoinAndSelect("sg721.meta", "meta")
+      // Possibly dangerous, but I couldn't figure out the variable replacement
+      .where(`coalesce(sg721.last_refreshed, now() - interval '${interval}') <= now() - interval '${interval}'`)
+      .andWhere(`meta.minted < meta.count`)
+
+    console.log(await contractQuery.getSql())
+    const contracts = await contractQuery.getMany()
+    return contracts
+  }
+
+  async setRefreshTimestamp(contract:string): Promise<UpdateResult> {
+    return await this.db.manager.getRepository(SG721)
+      .createQueryBuilder()
+      .update(SG721)
+      .set({ lastRefreshed: new Date() })
+      .where({contract})
+      .execute();
   }
 }

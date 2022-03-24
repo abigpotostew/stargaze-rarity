@@ -1,37 +1,15 @@
 import { PublishCommand, PublishCommandInput, SNSClient } from "@aws-sdk/client-sns";
 import { Handler } from 'aws-lambda';
 import * as dotenv from 'dotenv';
-import { ApiResponse, isOk } from "./src/api/apiResponse";
-import { handleCreateContract, handleReadContract, handleListContracts, handleReadToken, handleListTokens } from "./src/api/controller";
+import { ApiResponse } from "./src/api/apiResponse";
+import { handleCreateContract, handleListContracts, handleListTokens, handleReadContract, handleReadToken } from "./src/api/controller";
 import { Services } from "./src/services";
-import { createContractMessage } from "./src/message";
-import { defaultConfig } from "./src/config";
+import { publishSnsTopic } from "./src/sns"
 
 dotenv.config();
 
 let services: Services | null = null
-const { AWS_REGION: region, IS_OFFLINE: isOffline, METADATA_TOPIC_ARN: snsTopic } = process.env
-const snsClient = new SNSClient({ region });
 
-export const publishSnsTopic = async (data) => {
-  try {
-    if (!isOffline && snsTopic) {
-      const params: PublishCommandInput = {
-        Message: JSON.stringify(data),
-        TopicArn: snsTopic
-      }
-      const command = new PublishCommand(params);
-      const result = await snsClient.send(command)
-      return result
-    }
-    else {
-      console.log("No SNS messages sent in offline mode")
-    }
-
-  } catch (err) {
-    console.log("Error", err.stack);
-  }
-}
 
 export const handler: Handler = async (event: any) => {
   console.log(event)
@@ -44,8 +22,8 @@ export const handler: Handler = async (event: any) => {
         return response
       }
 
-      case `POST /contracts/{contractId}`: {        
-        const { pathParameters: { contractId } } = event               
+      case `POST /contracts/{contractId}`: {
+        const { pathParameters: { contractId } } = event
         const response: ApiResponse = await handleCreateContract(contractId)
         return response;
       }
@@ -68,8 +46,6 @@ export const handler: Handler = async (event: any) => {
         const response: ApiResponse = await handleReadToken(contractId, tokenId)
         return response
       }
-
-
 
       default: {
         throw new Error(`'${routeKey}' is not a supported route.`)
