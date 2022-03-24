@@ -262,6 +262,7 @@ export class Repository {
 
     console.log(await contractQuery.getSql())
     const contracts = await contractQuery.getMany()
+    console.log("Found " + contracts.length + " contracts to refresh")
     return contracts
   }
 

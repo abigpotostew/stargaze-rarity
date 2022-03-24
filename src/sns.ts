@@ -12,6 +12,7 @@ export const publishSnsTopic = async (data) => {
       }
       const command = new PublishCommand(params);
       const result = await snsClient.send(command)
+      console.log("published sns message to topic", JSON.stringify(params))
       return result
     }
     else {

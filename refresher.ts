@@ -17,11 +17,11 @@ export const handler: Handler = async (event: any, context: Context) => {
     // let's just make sure we have a valid interval
     if (parse(refreshInterval) > 0) {
         const contracts = await services.repo.getContractsToRefresh(refreshInterval)
-        contracts.forEach((c) => {
-            publishSnsTopic(createContractMessage(c.contract))
-        })
+        for (let c of contracts) {
+            await publishSnsTopic(createContractMessage(c.contract)) 
+        }
         
-        return await JSON.stringify(instanceToPlain(plainToClass(SG721Model, contracts)))
+        return JSON.stringify(instanceToPlain(plainToClass(SG721Model, contracts)))
     } else {
         throw new Error(`invalid interval received ${refreshInterval}`)
     }
