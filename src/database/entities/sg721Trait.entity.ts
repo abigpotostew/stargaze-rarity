@@ -13,7 +13,7 @@ export class SG721Trait {
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => SG721, contract => contract.traits)
+  @ManyToOne(() => SG721, contract => contract.traits, {onDelete:"CASCADE"})
   @JoinColumn({ name: 'contract_id' })
   contract: SG721;
 

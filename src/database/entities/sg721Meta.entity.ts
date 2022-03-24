@@ -11,8 +11,9 @@ export class SG721Meta {
     @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
     createdAt: Date;
 
-    @OneToOne(() => SG721, (sg721) => sg721.meta)
+    @OneToOne(() => SG721, (sg721) => sg721.meta, {onDelete:"CASCADE"})
     @JoinColumn({ name: 'contract_id' })
+    
     contract: SG721;
 
     @Column({

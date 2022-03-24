@@ -33,6 +33,6 @@ export class SG721 {
   @OneToMany(() => Token, token => token.contract)
   tokens: Token[];
 
-  @OneToOne(() => SG721Meta, meta => meta.contract)
+  @OneToOne(() => SG721Meta, meta => meta.contract, {onDelete:"CASCADE"})
   meta: SG721Meta;
 }
