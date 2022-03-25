@@ -15,6 +15,10 @@ const dataSource = new DataSource({
     password: process.env.POSTGRESQL_PASSWORD,
     database: process.env.POSTGRESQL_DATABASE,
     synchronize: true,
+    cache: {
+        duration: 60000 // 60 seconds
+    },
+    logging: false,
     entities: [
         isOffline ? '.build/src/database/entities/*.js' : 'src/database/entities/*{.ts,.js}'
     ],

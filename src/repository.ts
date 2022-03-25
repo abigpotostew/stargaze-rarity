@@ -1,5 +1,5 @@
 import { SG721 } from "./database/entities/sg721.entity";
-import { DataSource, In, UpdateResult } from "typeorm";
+import { Any, DataSource, In, UpdateResult } from "typeorm";
 import { ExtTrait, TraitValue } from "./database/utils/types";
 import { SG721Trait } from "./database/entities/sg721Trait.entity";
 import { Token } from "./database/entities/token.entity";
@@ -7,11 +7,6 @@ import { TokenMeta } from "./database/entities/tokenMeta.entity";
 import { TokenTrait } from "./database/entities/tokenTrait.entity";
 import { SG721Meta } from "./database/entities/sg721Meta.entity";
 import { saveChunked } from "./database/insert-chunk";
-import { defaultConfig } from "./config";
-
-const cacheOpts = {
-  cache: defaultConfig().cacheDurationMs,
-}
 
 export class Repository {
   private readonly db: DataSource;
@@ -26,7 +21,6 @@ export class Repository {
         contract_address: contractId,
         tokenId: tokenId
       }], relations: ["meta", "traits", "traits.trait", "contract.meta"],
-      ...cacheOpts,
     });
   }
 
@@ -38,7 +32,6 @@ export class Repository {
       skip,
       relations: ["meta", "traits", "traits.trait", "contract.meta"],
       order: { meta: { score: 'DESC' } },
-      ...cacheOpts,
     });
   }
 
@@ -46,7 +39,6 @@ export class Repository {
     return await this.db.manager.getRepository(SG721).findOne({
       where: [{ contract: contractId }],
       relations: ["meta", "traits"],
-      ...cacheOpts,
     });
   }
 
@@ -56,7 +48,6 @@ export class Repository {
       skip,
       relations: ["meta", "traits"],
       order: { createdAt: 'DESC' },
-      ...cacheOpts,
     });
   }
 
@@ -163,7 +154,7 @@ export class Repository {
         return map;
       }, new Map<string, Token>()).values())
       await saveChunked(tokensRepo, Token, chunk, '"token_unique_id_contract"', true, undefined, chunkSize)
-      const tokenWithId = await tokensRepo.find({ where: { contract:contract, tokenId: In(chunk.map(t => t.tokenId)) } })
+      const tokenWithId = await tokensRepo.find({ where: { contract: { id:contract.id }, tokenId: Any(chunk.map(t => t.tokenId)) } })
       const idMap = tokenWithId.reduce((acc, t) => {
         acc[t.tokenId] = t.id
         return acc
