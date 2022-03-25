@@ -1,10 +1,10 @@
 import { createRetryClient } from "./axios";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 
-const retries = 10;
+const retries = 20;
 const httpClientTimeout = 4500
 const tokenRequestTimeout = 16000
-const client = createRetryClient({ retries, noResponseRetries: 0 })
+const client = createRetryClient({ retries, noResponseRetries: retries })
 
 export interface MetadataResponse {
   isNotFound: boolean;

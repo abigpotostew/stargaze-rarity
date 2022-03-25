@@ -42,7 +42,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     console.log('fetch', i)
     let result = await fetchMetadata(gateways, cid, i)
     if (!result) {
-      throw new Error(`Failed to fetch token metadata ${i} ${sg721Contract}`)
+      throw new Error(`Failed to fetch token metadata ${i} ${sg721Contract} @ ${cid}`)
     }
     if(result.isNotFound){
       //skip it!
