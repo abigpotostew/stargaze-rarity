@@ -163,7 +163,7 @@ export class Repository {
         return map;
       }, new Map<string, Token>()).values())
       await saveChunked(tokensRepo, Token, chunk, '"token_unique_id_contract"', true, undefined, chunkSize)
-      const tokenWithId = await tokensRepo.find({ where: { tokenId: In(chunk.map(t => t.tokenId)) } })
+      const tokenWithId = await tokensRepo.find({ where: { contract:contract, tokenId: In(chunk.map(t => t.tokenId)) } })
       const idMap = tokenWithId.reduce((acc, t) => {
         acc[t.tokenId] = t.id
         return acc
@@ -239,7 +239,7 @@ export class Repository {
       }
     }
     const uniqueTraits = traits.reduce((map, curr) => {
-      const key = curr.traitType + JSON.stringify(curr.value);
+      const key = curr.traitType +'-'+ JSON.stringify(curr.value);
       map.set(key, curr)
       return map;
     }, new Map<string, SG721Trait>())
@@ -258,7 +258,7 @@ export class Repository {
       .leftJoinAndSelect("sg721.meta", "meta")
       // Possibly dangerous, but I couldn't figure out the variable replacement
       .where(`coalesce(sg721.last_refreshed, now() - interval '${interval}') <= now() - interval '${interval}'`)
-      .andWhere(`meta.minted < meta.count`)
+      .andWhere(`(meta.minted is null or meta.minted < meta.count)`)
 
     console.log(await contractQuery.getSql())
     const contracts = await contractQuery.getMany()

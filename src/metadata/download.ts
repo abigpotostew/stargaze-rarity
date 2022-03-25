@@ -33,6 +33,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
   //assume it's sequential, without gaps in token ids
 
   const cid = getCid(contractInfo.baseUri)
+  console.log(`Downloading metadata for contract ${sg721Contract} from ${cid}`)
 
   const allTraits: { [key: string]: Map<TraitValue, number> } = {};
   const tokenTraits = new Map<string, Trait[]>();
@@ -41,7 +42,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     console.log('fetch', i)
     let result = await fetchMetadata(gateways, cid, i)
     if (!result) {
-      throw new Error(`Failed to fetch token metadata ${i}`)
+      throw new Error(`Failed to fetch token metadata ${i} ${sg721Contract}`)
     }
     if(result.isNotFound){
       //skip it!
@@ -50,7 +51,7 @@ export const downloadMetadata = async (sg721Contract: string) => {
     }
     const metadata = result.data;
     let traits: Trait[] = [];
-    const attributes = metadata.traits || metadata.attributes;
+    const attributes = metadata.attributes || metadata.traits;
     if (Array.isArray(attributes)) {
       traits = attributes as Trait[]
     }
