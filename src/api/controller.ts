@@ -6,6 +6,8 @@ import { SG721Model } from "./models/sg721.model";
 import { SG721SimpleModel } from "./models/sg721Simple.model";
 import { TokenModel } from "./models/token.model";
 import { createContract, readContract, listContracts, readToken, listTokens } from "./service";
+import { publishSnsTopic } from "../sns";
+import { createContractMessage } from "../message";
 
 const toJson = (obj: any): string => JSON.stringify(instanceToPlain(obj))
 
@@ -82,10 +84,21 @@ const handleReadToken = async (contractId, tokenId) => {
     })
 }
 
+const handleRefreshOneContract = async (contractId) => {
+    return handleReturn(200, async () => {
+        const c = await readContract(contractId)
+        if(c) {
+            await publishSnsTopic(createContractMessage(c.contract))
+        }
+        return convertModel(SG721Model, c)
+    })
+}
+
 export {
     handleCreateContract,
     handleReadContract,
     handleListContracts,
     handleReadToken,
-    handleListTokens
+    handleListTokens,
+    handleRefreshOneContract
 };

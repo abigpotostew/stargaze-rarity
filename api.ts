@@ -2,7 +2,14 @@ import { PublishCommand, PublishCommandInput, SNSClient } from "@aws-sdk/client-
 import { Handler } from 'aws-lambda';
 import * as dotenv from 'dotenv';
 import { ApiResponse } from "./src/api/apiResponse";
-import { handleCreateContract, handleListContracts, handleListTokens, handleReadContract, handleReadToken } from "./src/api/controller";
+import {
+  handleCreateContract,
+  handleListContracts,
+  handleListTokens,
+  handleReadContract,
+  handleReadToken,
+  handleRefreshOneContract
+} from "./src/api/controller";
 import { Services } from "./src/services";
 import { publishSnsTopic } from "./src/sns"
 
@@ -44,6 +51,12 @@ export const handler: Handler = async (event: any) => {
       case 'GET /contracts/{contractId}/rarities/{tokenId}': {
         const { pathParameters: { contractId, tokenId } } = event
         const response: ApiResponse = await handleReadToken(contractId, tokenId)
+        return response
+      }
+
+      case 'PUT /contracts/refresh/{contractId}': {
+        const { pathParameters: { contractId } } = event
+        const response: ApiResponse = await handleRefreshOneContract(contractId)
         return response
       }
 

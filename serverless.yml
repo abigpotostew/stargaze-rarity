@@ -81,6 +81,12 @@ functions:
       - httpApi:
           path: /contracts/{contractId}/rarities/{tokenId}
           method: get
+      - httpApi:
+          path: /contracts/refresh/{contractId}
+          method: put
+          authorizer:
+            name: basicAuth
+            type: request
   metadata:
     timeout: 900 # 15 minutes, because uncached ipfs files take a while to download
     handler: metadata.handler

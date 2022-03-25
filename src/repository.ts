@@ -249,7 +249,7 @@ export class Repository {
       .leftJoinAndSelect("sg721.meta", "meta")
       // Possibly dangerous, but I couldn't figure out the variable replacement
       .where(`coalesce(sg721.last_refreshed, now() - interval '${interval}') <= now() - interval '${interval}'`)
-      .andWhere(`(meta.minted is null or meta.minted < meta.count)`)
+      .andWhere(`(sg721.last_refreshed is null or meta.minted is null or meta.minted < meta.count)`)
 
     console.log(await contractQuery.getSql())
     const contracts = await contractQuery.getMany()
