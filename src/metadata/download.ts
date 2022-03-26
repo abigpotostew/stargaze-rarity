@@ -53,7 +53,10 @@ export const downloadMetadata = async (sg721Contract: string) => {
     let traits: Trait[] = [];
     const attributes = metadata.attributes || metadata.traits;
     if (Array.isArray(attributes)) {
-      traits = attributes as Trait[]
+      traits = attributes.map(a => ({
+        trait_type: a.trait_type,
+        value: a.value || a.trait_value, // for ibc frens
+      }));
     }
     
     // count trait frequency
