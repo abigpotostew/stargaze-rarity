@@ -53,7 +53,10 @@ export const downloadMetadata = async (sg721Contract: string) => {
     let traits: Trait[] = [];
     const attributes = metadata.attributes || metadata.traits;
     if (Array.isArray(attributes)) {
-      traits = attributes as Trait[]
+      traits = attributes.map(a => ({
+        trait_type: a.trait_type,
+        value: a.value || a.trait_value, // for ibc frens
+      }));
     }
     
     // count trait frequency
@@ -100,11 +103,15 @@ export const downloadMetadata = async (sg721Contract: string) => {
     rankingInfo.push({ tokenId, score: scores.get(tokenId), numTraits: thisTokenTraits.length, rank: null })
   }
 
+  
+  // High score, low rank is best. Rank 1 is the most rare.
   const rankings = new Map<string, number>(
     rankingInfo
+      // sort by score ascending
       .sort((a, b) => {
         return a.score - b.score || a.numTraits - b.numTraits || parseInt(a.tokenId) - parseInt(b.tokenId)
       })
+      // reverse it so highest score is rank 1
       .reverse()
       .map((r, i) => [r.tokenId, i + 1] as [string, number])
   )
