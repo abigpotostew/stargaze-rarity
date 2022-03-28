@@ -27,8 +27,13 @@ export class TokenModel {
 
     @Expose()
     @Type(() => Number)
+    @Transform(({obj}) => obj?.contract?.meta?.count, {toClassOnly: true})
+    count: number;
+
+    @Expose()
+    @Type(() => Number)
     @Transform(({obj}) => obj?.contract?.meta?.minted, {toClassOnly: true})
-    total: number;
+    minted: number;
 
     @Exclude()
     @Type(() => TokenMetaModel)
