@@ -5,10 +5,12 @@
   "dependencies": {
     "@aws-sdk/client-sns": "^3.54.1",
     "@types/dotenv": "^8.2.0",
+    "@types/k6": "^0.36.0",
     "axios": "^0.26.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "cosmwasm": "^1.0.3",
+    "k6": "^0.0.0",
     "parse-duration": "^1.0.2",
     "pg": "^8.7.3",
     "retry-axios": "^2.6.0",
@@ -21,7 +23,9 @@
     "deploy": " NODE_ENV=production sls deploy",
     "deployProd": " NODE_ENV=production sls deploy --stage prod",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
-    "query": "npx cosmwasm --init scripts/query.ts"
+    "query": "npx cosmwasm --init scripts/query.ts",
+    "loadTestProd": "HOST=https://api.howrare.world/v1 k6 run --vus 5 --duration 200s ./test/loadTests.js",
+    "loadTestProdDebug": "HOST=https://api.howrare.world/v1 k6 run --http-debug ./test/loadTests.js"
   },
   "devDependencies": {
     "@cosmjs/cli": "^0.28.0",
