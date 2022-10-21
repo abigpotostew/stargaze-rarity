@@ -17,7 +17,6 @@ dotenv.config();
 
 let services: Services | null = null
 
-
 export const handler: Handler = async (event: any) => {
   console.log(event)
   try {

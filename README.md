@@ -57,12 +57,19 @@ curl --location --request GET 'localhost:3000/contract/stars1tcpnf8nuywsalf4h30p
 
 -----
 Migrations:
-* Create migration
-`npm run typeorm migration:create -n <name>`
-* run all
-`npm run typeorm migration:run`
-* revert last migration
-`npm run typeorm migration:revert`
+
+Migrations run automatically based on the typeorm model files.
+[//]: # (* Create migration)
+
+[//]: # (`npm run typeorm migration:create -n <name>`)
+
+[//]: # (* run all)
+
+[//]: # (`npm run typeorm migration:run`)
+
+[//]: # (* revert last migration)
+
+[//]: # (`npm run typeorm migration:revert`)
 
 ----
 

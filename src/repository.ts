@@ -248,7 +248,7 @@ export class Repository {
       .createQueryBuilder("sg721")
       .leftJoinAndSelect("sg721.meta", "meta")
       // Possibly dangerous, but I couldn't figure out the variable replacement
-      .where(`coalesce(sg721.last_refreshed, now() - interval '${interval}') <= now() - interval '${interval}'`)
+      .where(`coalesce(sg721.last_refreshed, now() - interval '${interval}') <= now() - interval '${interval}' and sg721.createdAt <= now() - interval '30 days'`)
       .andWhere(`(sg721.last_refreshed is null or meta.minted is null or meta.minted < meta.count)`)
 
     console.log(await contractQuery.getSql())

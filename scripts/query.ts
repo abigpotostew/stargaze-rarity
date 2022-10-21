@@ -1,9 +1,9 @@
 import { CosmWasmClient } from 'cosmwasm';
 
-const minter= 'stars187zds75uenfxht2zqz7e0wxn3ushcawvf2ndrns6q63hgfn6ptqqt0ayra';
-const sg721= "stars18a0pvw326fydfdat5tzyf4t8lhz0v6fyfaujpeg07fwqkygcxejsnp5fac";
+const minter= 'stars1h36lesetp943pcnf9xehugtd2pfj7m5t9e9879mjj85fc9vtm25qutjky5';
+const sg721= "stars17xn7crwcc05p5cg5evsl7zz4w3z2ajtysn0j3dnckfdnjxykvvrs3yktgg";
 
-const client = await CosmWasmClient.connect('https://rpc.stargaze-apis.com/');
+const client = await CosmWasmClient.connect('https://rpc.castor-1.stargaze-apis.com/');
 
 const query =async (msg:any)=>{
   const res = await client.queryContractSmart(sg721, msg);

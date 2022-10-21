@@ -18,7 +18,13 @@ const convertModel = function <T, V>(klass: ClassConstructor<T>, obj: V): T | nu
     return null
 }
 
-const handleReturn = async (statusCode: number, callback: () => any): Promise<ApiResponse> => {
+const cacheHeader=(maxAgeSeconds:number=1800,staleAgeSeconds:number=1800)=>{
+  return {
+    'Cache-Control': `public, s-maxage=${maxAgeSeconds}, stale-while-revalidate=${staleAgeSeconds}`
+  }
+}
+
+const handleReturn = async (statusCode: number, callback: () => any,  headers?:{ [key: string]: string }): Promise<ApiResponse> => {
     let payload
     try {
         const result = await callback();
@@ -26,7 +32,7 @@ const handleReturn = async (statusCode: number, callback: () => any): Promise<Ap
             const message = "Resource not found"
             payload =  {
                 statusCode: 404,
-                body: toJson({ message })
+                body: toJson({ message }),
             }
         }
         else {
@@ -40,11 +46,14 @@ const handleReturn = async (statusCode: number, callback: () => any): Promise<Ap
         const { message } = e
         payload =  {
             statusCode: 400,
-            body: toJson({ message })
+            body: toJson({ message }),
         }
     }
     payload.headers = {
         "Content-Type": "application/json"
+    }
+    if(headers){
+      payload.headers = {...headers,...payload.headers}
     }
     return payload;
 }
@@ -81,7 +90,7 @@ const handleReadToken = async (contractId, tokenId) => {
     return handleReturn(200, async () => {
         const token = await readToken(contractId, tokenId)
         return convertModel(TokenModel, token)
-    })
+    }, cacheHeader())
 }
 
 const handleRefreshOneContract = async (contractId) => {
